@@ -32,7 +32,7 @@ If you have set up domain forwarding (like "Forward with masking"), **remove it 
 #### Second: Find DNS Management
 Look for sections named:
 - "DNS Settings"
-- "DNS Management" 
+- "DNS Management"
 - "Manage DNS"
 - "Advanced DNS"
 - "DNS Records"
@@ -124,8 +124,8 @@ If you already configured domain forwarding (like "Forward with masking"):
 Common domain registrars and their DNS management pages:
 - **GoDaddy**: Domain Settings → Manage DNS (NOT "Forwarding")
 - **Namecheap**: Domain List → Manage → Advanced DNS (NOT "Redirect Domain")
-- **Squarespace** (formerly Google Domains): DNS Settings → Custom records
-- **Cloudflare**: DNS → Records
+- **Squarespace** (formerly Google Domains): DNS Settings → Custom records (NOT "Domain Forwarding")
+- **Cloudflare**: DNS → Records (NOT "Redirects")
 - **Porkbun**: DNS → Manage (NOT "URL Forwarding")
 - **Hover**: DNS → Edit (NOT "Forward")
 
