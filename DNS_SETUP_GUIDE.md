@@ -3,11 +3,42 @@
 ## Problem
 Your website at `shreyash-ranjan.com` is not working because the DNS records are not properly configured to point to GitHub Pages.
 
+## ⚠️ Important: DNS Records vs Domain Forwarding
+
+**DO NOT use "Domain Forwarding" or "URL Forwarding"** - these features redirect visitors but don't properly host your site.
+
+What you see as "Forwarding" or "Forward with masking" in your registrar is **NOT** the same as DNS records. You need to:
+1. **Remove any domain forwarding rules** for shreyash-ranjan.com
+2. **Add DNS A records instead** (instructions below)
+
+### Why Domain Forwarding Doesn't Work
+- ❌ Domain forwarding creates a redirect, not a proper DNS connection
+- ❌ GitHub Pages won't recognize forwarded traffic correctly
+- ❌ SSL certificates won't work properly
+- ✅ DNS A records tell the internet where your domain lives
+- ✅ GitHub Pages can provision SSL and serve your site properly
+
 ## Solution
 
 ### Step 1: Configure DNS Records at Your Domain Registrar
 
-You need to add DNS records at your domain registrar (where you purchased `shreyash-ranjan.com`). 
+**IMPORTANT: Look for "DNS Settings" or "DNS Management", NOT "Forwarding" or "Domain Forwarding"**
+
+You need to add DNS records at your domain registrar (where you purchased `shreyash-ranjan.com`).
+
+#### First: Remove Any Domain Forwarding
+If you have set up domain forwarding (like "Forward with masking"), **remove it first**. This is usually found in a separate "Forwarding" section.
+
+#### Second: Find DNS Management
+Look for sections named:
+- "DNS Settings"
+- "DNS Management" 
+- "Manage DNS"
+- "Advanced DNS"
+- "DNS Records"
+- "Name Server Records"
+
+**NOT** sections named "Forwarding", "URL Redirect", or "Domain Forwarding". 
 
 **Option A: Using A Records (Recommended for apex domain)**
 
@@ -72,6 +103,13 @@ Once DNS is configured correctly, you should be able to access your site at:
 
 ## Troubleshooting
 
+### I set up "Domain Forwarding" instead of DNS records
+If you already configured domain forwarding (like "Forward with masking"):
+1. **Remove the forwarding rule** in your registrar's forwarding section
+2. Go to the **DNS Management** section (separate from forwarding)
+3. Add the A records as specified above
+4. Wait for DNS propagation (24-48 hours)
+
 ### Site not loading after DNS configuration
 - Wait 24-48 hours for full DNS propagation
 - Clear your browser cache
@@ -82,14 +120,16 @@ Once DNS is configured correctly, you should be able to access your site at:
 - It can take up to 24 hours for GitHub to provision the SSL certificate
 - Make sure "Enforce HTTPS" is checked in GitHub Pages settings
 
-### Where to configure DNS
+### Where to configure DNS (NOT Forwarding)
 Common domain registrars and their DNS management pages:
-- **GoDaddy**: Domain Settings → Manage DNS
-- **Namecheap**: Domain List → Manage → Advanced DNS
+- **GoDaddy**: Domain Settings → Manage DNS (NOT "Forwarding")
+- **Namecheap**: Domain List → Manage → Advanced DNS (NOT "Redirect Domain")
 - **Squarespace** (formerly Google Domains): DNS Settings → Custom records
 - **Cloudflare**: DNS → Records
-- **Porkbun**: DNS → Manage
-- **Hover**: DNS → Edit
+- **Porkbun**: DNS → Manage (NOT "URL Forwarding")
+- **Hover**: DNS → Edit (NOT "Forward")
+
+**Key Point**: You're looking for a page where you can add A records, CNAME records, TXT records, etc. If you only see options to forward or redirect, you're in the wrong section!
 
 ## Reference
 For more details, see GitHub's official documentation:
