@@ -60,7 +60,8 @@ You should see the GitHub Pages IP addresses listed above.
 ## Temporary Access
 
 While DNS is being configured, your site will be accessible at:
-- `https://codingshreyash.github.io` (once this PR is merged to main branch)
+- `http://codingshreyash.github.io` (once this PR is merged to main branch)
+- `https://codingshreyash.github.io` (if HTTPS is enabled for the GitHub Pages site)
 
 ## Verification
 
@@ -85,8 +86,10 @@ Once DNS is configured correctly, you should be able to access your site at:
 Common domain registrars and their DNS management pages:
 - **GoDaddy**: Domain Settings → Manage DNS
 - **Namecheap**: Domain List → Manage → Advanced DNS
-- **Google Domains**: DNS → Custom records
+- **Squarespace** (formerly Google Domains): DNS Settings → Custom records
 - **Cloudflare**: DNS → Records
+- **Porkbun**: DNS → Manage
+- **Hover**: DNS → Edit
 
 ## Reference
 For more details, see GitHub's official documentation:
