@@ -21,6 +21,8 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
+  html{overflow-x:hidden}
+  body{min-width:0;overflow-x:hidden}
   body{
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
@@ -53,6 +55,14 @@
     transition:background .15s ease, color .15s ease;
   }
   .topbar .resume-btn:hover{background:var(--bg);color:var(--ink);border-bottom-color:var(--ink)}
+
+  /* mobile topbar fixes */
+  @media (max-width: 640px){
+    .topbar{flex-wrap:wrap;gap:8px}
+    .topbar nav{gap:12px;font-size:11px}
+    .topbar .resume-btn{padding:3px 8px;font-size:11px}
+    .topbar > div{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
+  }
 
   /* hero */
   .hero{
@@ -144,6 +154,9 @@
   @media (max-width: 640px){
     .row{grid-template-columns:1fr;gap:4px;padding:16px 0}
     .row .where{text-align:left}
+    .contact-grid .val{word-break:break-word}
+    .gh-card .gh-handle{font-size:14px}
+    .wrap{overflow-x:hidden}
   }
 
   /* highlight badge for current role */
