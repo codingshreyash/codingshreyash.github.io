@@ -88,10 +88,16 @@
 
   /* mobile topbar fixes */
   @media (max-width: 640px){
-    .topbar{flex-wrap:wrap;gap:8px}
-    .topbar nav{gap:12px;font-size:11px}
-    .topbar .resume-btn{padding:3px 8px;font-size:11px}
-    .topbar > div{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
+    .topbar{flex-wrap:wrap;gap:6px;padding-bottom:12px}
+    .topbar nav{gap:16px;font-size:11px;width:100%;justify-content:space-between}
+    .topbar .resume-btn{padding:4px 8px;font-size:10px;white-space:nowrap}
+    .topbar > div{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  }
+
+  @media (max-width: 480px){
+    .topbar > div{display:none}
+    .topbar{justify-content:center}
+    .topbar nav{gap:14px;justify-content:space-around}
   }
 
   /* hero */

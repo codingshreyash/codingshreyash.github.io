@@ -7,10 +7,10 @@ Personal portfolio website showcasing my experience in software engineering.
 🔗 [codingshreyash.github.io](https://codingshreyash.github.io)
 
 ## Features
-- ⚡ Typewriter animation for name
-- 🌙 Dark mode toggle (warm amber terminal theme)
-- 📱 Fully responsive design
-- 🎨 Clean, minimalist layout
+- Typewriter animation for name
+- Dark mode toggle (warm amber terminal theme)
+- Fully responsive design
+- Clean, minimalist layout
 
 ## Tech Stack
 - HTML5
