@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#0d1117" rx="2"/>
+  <rect x="1" y="1" width="30" height="30" fill="none" stroke="#21262d" stroke-width="1" rx="1"/>
+
+  <!-- Terminal window header -->
+  <rect x="2" y="2" width="28" height="6" fill="#161b22"/>
+  <circle cx="5" cy="5" r="1" fill="#ff5f56"/>
+  <circle cx="8" cy="5" r="1" fill="#ffbd2e"/>
+  <circle cx="11" cy="5" r="1" fill="#27ca3f"/>
+
+  <!-- Terminal content -->
+  <text x="3" y="15" font-family="monospace" font-size="3" fill="#00ff41">$</text>
+  <text x="6" y="15" font-family="monospace" font-size="3" fill="#e6edf3">shreyash</text>
+
+  <!-- Blinking cursor -->
+  <rect x="22" y="13" width="1" height="3" fill="#00ff41">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+</svg>

@@ -8,9 +8,9 @@ Personal portfolio website showcasing my experience in software engineering.
 
 ## Features
 - ⚡ Typewriter animation for name
-- 🌙 Dark mode toggle (warm amber terminal theme)
-- 📱 Fully responsive design
-- 🎨 Clean, minimalist layout
+- 🌙 Dark mode toggle (cool charcoal technical theme)
+- 📱 Fully responsive design  
+- 🎨 Clean, minimalist layout with notebook aesthetic
 
 ## Tech Stack
 - HTML5
