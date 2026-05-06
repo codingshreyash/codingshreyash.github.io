@@ -257,7 +257,7 @@
     <!-- HERO -->
     <section class="hero" style="border-bottom:1px solid var(--rule)">
       <div>
-        <h1>Shreyash<br/>Ranjan<span class="cursor"></span></h1>
+        <h1><span id="typewriter-text"></span><span class="cursor"></span></h1>
         <p class="role">
           CS @ Pitt, graduating Dec 2026. Previously Coinbase, Palantir, Vanguard, Lockheed Martin.
         </p>
@@ -425,6 +425,36 @@
       }
     });
   });
+
+  // typewriter effect for name
+  function typeWriter() {
+    const text = 'Shreyash\nRanjan';
+    const element = document.getElementById('typewriter-text');
+    let i = 0;
+
+    element.innerHTML = '';
+
+    function type() {
+      if (i < text.length) {
+        const char = text.charAt(i);
+        if (char === '\n') {
+          element.innerHTML += '<br/>';
+        } else {
+          element.innerHTML += char;
+        }
+        i++;
+        setTimeout(type, 150); // typing speed
+      } else {
+        // Wait 7 seconds then restart
+        setTimeout(typeWriter, 7000);
+      }
+    }
+
+    type();
+  }
+
+  // Start typewriter effect when page loads
+  document.addEventListener('DOMContentLoaded', typeWriter);
 </script>
 </body>
 </html>
