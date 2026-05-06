@@ -22,6 +22,18 @@
     --accent:#111111;
     --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
+
+  /* dark mode / terminal theme */
+  [data-theme="dark"]{
+    --bg:#0d1117;
+    --bg-2:#161b22;
+    --ink:#00ff41;
+    --ink-2:#8cc8ff;
+    --muted:#7d8590;
+    --rule:#21262d;
+    --hair:#30363d;
+    --accent:#00ff41;
+  }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
   html{overflow-x:hidden}
@@ -59,11 +71,23 @@
   }
   .topbar .resume-btn:hover{background:var(--bg);color:var(--ink);border-bottom-color:var(--ink)}
 
+  /* theme toggle */
+  .theme-toggle{
+    background:none;border:1px solid var(--hair);padding:4px 8px;
+    color:var(--ink);font-family:var(--mono);font-size:12px;
+    cursor:pointer;border-radius:2px;
+    transition:all .15s ease;
+  }
+  .theme-toggle:hover{
+    background:var(--ink);color:var(--bg);border-color:var(--ink);
+  }
+
   /* mobile topbar fixes */
   @media (max-width: 640px){
     .topbar{flex-wrap:wrap;gap:8px}
     .topbar nav{gap:12px;font-size:11px}
     .topbar .resume-btn{padding:3px 8px;font-size:11px}
+    .theme-toggle{padding:3px 6px;font-size:11px}
     .topbar > div{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
   }
 
@@ -250,6 +274,7 @@
         <a href="#experience">experience</a>
         <a href="#projects">projects</a>
         <a href="#contact">contact</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">◐</button>
         <a class="resume-btn" href="https://drive.google.com/file/d/1cP_z6DeEV5iLpLzm7TYCrM_e0wRMyFBk/view?usp=sharing" target="_blank" rel="noopener">resume ↗</a>
       </nav>
     </header>
@@ -454,6 +479,35 @@
 
   // Start typewriter effect when page loads
   document.addEventListener('DOMContentLoaded', typeWriter);
+
+  // dark mode toggle
+  function initTheme() {
+    const toggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    // Set initial theme
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateToggleText(savedTheme);
+
+    // Toggle functionality
+    toggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateToggleText(newTheme);
+    });
+  }
+
+  function updateToggleText(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    toggle.textContent = theme === 'dark' ? '☀' : '◐';
+    toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  // Initialize theme on page load
+  document.addEventListener('DOMContentLoaded', initTheme);
 </script>
 </body>
 </html>
