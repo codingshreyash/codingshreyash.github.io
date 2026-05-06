@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#f4f1ec;
@@ -233,6 +234,160 @@
     .wrap{overflow-x:hidden}
   }
 
+  /* git timeline connectors */
+  .xp{
+    position:relative;
+  }
+  .xp::before{
+    content:'';
+    position:absolute;
+    left:85px;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:linear-gradient(to bottom,
+      transparent 20px,
+      var(--hair) 20px,
+      var(--hair) calc(100% - 20px),
+      transparent calc(100% - 20px)
+    );
+    z-index:1;
+  }
+  .row{
+    position:relative;
+    z-index:2;
+  }
+  .row::before{
+    content:'';
+    position:absolute;
+    left:84px;
+    top:50%;
+    width:4px;
+    height:4px;
+    background:var(--muted);
+    border-radius:50%;
+    transform:translateY(-50%);
+    z-index:3;
+  }
+  .row.divider::before{
+    background:var(--accent);
+    width:6px;
+    height:6px;
+  }
+  @media (max-width: 640px){
+    .xp::before,.row::before{display:none}
+  }
+
+  /* redacted text treatment */
+  .redacted{
+    background:var(--ink);
+    color:transparent;
+    padding:0 4px;
+    position:relative;
+    border-radius:2px;
+  }
+  /* redacted styling without comment */
+
+  /* light mode notebook aesthetics */
+  :root:not([data-theme="dark"]) .margin-note{
+    position:absolute;
+    font-size:10px;
+    color:#8b7355;
+    font-family:'Kalam',cursive;
+    opacity:0.8;
+    z-index:10;
+    pointer-events:none;
+  }
+  :root:not([data-theme="dark"]) .margin-note.age-16{
+    right:-65px;
+    top:-5px;
+    color:#a67c52;
+    transform:rotate(-2deg);
+  }
+  :root:not([data-theme="dark"]) .margin-note.nyc-yr1{
+    right:-75px;
+    top:-8px;
+    transform:rotate(1deg);
+  }
+
+  /* dog-eared paper corner */
+  :root:not([data-theme="dark"]) .hero{
+    position:relative;
+    overflow:visible;
+  }
+  :root:not([data-theme="dark"]) .hero::after{
+    content:'';
+    position:absolute;
+    top:0;
+    right:0;
+    width:40px;
+    height:40px;
+    background:
+      linear-gradient(225deg,transparent 15px,var(--bg-2) 15px),
+      linear-gradient(135deg,var(--bg) 12px,#d4cfc4 12px);
+    box-shadow:
+      inset -2px 2px 4px rgba(0,0,0,0.1),
+      2px -2px 4px rgba(0,0,0,0.05);
+  }
+
+  /* page number in footer */
+  :root:not([data-theme="dark"]) footer{
+    position:relative;
+  }
+  :root:not([data-theme="dark"]) footer::before{
+    content:'p. 1';
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:10px;
+    color:var(--muted);
+    font-style:italic;
+  }
+
+  /* hand-drawn underlines */
+  :root:not([data-theme="dark"]) .h2 .rule{
+    display:none;
+  }
+  :root:not([data-theme="dark"]) .h2::after{
+    content:'';
+    flex:1;
+    height:12px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12'%3E%3Cpath d='M5,8 Q50,4 100,7 T200,6 T290,9' stroke='%23cfcabf' stroke-width='1' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:repeat-x;
+    background-position:bottom center;
+    margin-left:14px;
+    align-self:baseline;
+  }
+
+  /* document date stamp */
+  :root:not([data-theme="dark"]) .date-stamp{
+    position:absolute;
+    top:24px;
+    right:40px;
+    font-size:9px;
+    color:var(--muted);
+    font-style:italic;
+    opacity:0.7;
+    transform:rotate(1deg);
+  }
+
+  /* mobile adjustments for notebook effects */
+  @media (max-width: 640px){
+    :root:not([data-theme="dark"]) .margin-note{
+      display:none;
+    }
+    :root:not([data-theme="dark"]) .date-stamp{
+      position:static;
+      text-align:center;
+      margin:12px 0;
+      transform:none;
+    }
+    :root:not([data-theme="dark"]) .hero::after{
+      width:25px;
+      height:25px;
+    }
+  }
+
   /* highlight badge for current role */
   .badge{
     display:inline-block;font-size:10px;letter-spacing:0.08em;
@@ -325,6 +480,9 @@
       </nav>
     </header>
 
+    <!-- DOCUMENT DATE STAMP -->
+    <div class="date-stamp">drafted: Jan 2025 · updated: May 2026</div>
+
     <!-- THEME TOGGLE -->
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">◐</button>
 
@@ -370,7 +528,7 @@
         <div class="row divider">
           <div class="when">May — Aug 2026</div>
           <div class="what">
-            <span class="co">TBD</span>
+            <span class="co redacted">███████</span>
             <span class="title">Software Engineer Intern</span>
           </div>
           <div class="where">California</div>
@@ -516,10 +674,9 @@
           element.innerHTML += char;
         }
         i++;
-        setTimeout(type, 150); // typing speed
+        setTimeout(type, 300); // slower, more deliberate typing speed
       } else {
-        // Wait 7 seconds then restart
-        setTimeout(typeWriter, 7000);
+        // Typewriter stops after completion - confident and final
       }
     }
 
