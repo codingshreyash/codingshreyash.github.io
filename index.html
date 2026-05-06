@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Shreyash Ranjan</title>
+<title>Shreyash</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/my-avatar.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/images/my-avatar.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/my-avatar.png">
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-<script src="image-slot.js"></script>
 <style>
   :root{
     --bg:#f4f1ec;
@@ -20,8 +22,22 @@
     --accent:#111111;
     --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
+
+  /* dark mode / terminal theme */
+  [data-theme="dark"]{
+    --bg:#0d1117;
+    --bg-2:#161b22;
+    --ink:#00ff41;
+    --ink-2:#8cc8ff;
+    --muted:#7d8590;
+    --rule:#21262d;
+    --hair:#30363d;
+    --accent:#00ff41;
+  }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
+  html{overflow-x:hidden}
+  body{min-width:0;overflow-x:hidden}
   body{
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
@@ -54,6 +70,26 @@
     transition:background .15s ease, color .15s ease;
   }
   .topbar .resume-btn:hover{background:var(--bg);color:var(--ink);border-bottom-color:var(--ink)}
+
+  /* theme toggle */
+  .theme-toggle{
+    background:none;border:1px solid var(--hair);padding:4px 8px;
+    color:var(--ink);font-family:var(--mono);font-size:12px;
+    cursor:pointer;border-radius:2px;
+    transition:all .15s ease;
+  }
+  .theme-toggle:hover{
+    background:var(--ink);color:var(--bg);border-color:var(--ink);
+  }
+
+  /* mobile topbar fixes */
+  @media (max-width: 640px){
+    .topbar{flex-wrap:wrap;gap:8px}
+    .topbar nav{gap:12px;font-size:11px}
+    .topbar .resume-btn{padding:3px 8px;font-size:11px}
+    .theme-toggle{padding:3px 6px;font-size:11px}
+    .topbar > div{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:45%}
+  }
 
   /* hero */
   .hero{
@@ -95,7 +131,7 @@
     background:var(--bg-2);
     position:relative;
   }
-  .photo-wrap image-slot{width:100%;height:100%;display:block}
+  .photo-wrap img{width:100%;height:100%;display:block;object-fit:cover}
   .photo-cap{
     position:absolute;left:0;right:0;bottom:-22px;
     font-size:10px;color:var(--muted);text-align:center;
@@ -145,6 +181,9 @@
   @media (max-width: 640px){
     .row{grid-template-columns:1fr;gap:4px;padding:16px 0}
     .row .where{text-align:left}
+    .contact-grid .val{word-break:break-word}
+    .gh-card .gh-handle{font-size:14px}
+    .wrap{overflow-x:hidden}
   }
 
   /* highlight badge for current role */
@@ -229,12 +268,13 @@
   <div class="wrap" data-screen-label="Home">
     <!-- TOP BAR -->
     <header class="topbar">
-      <div><span class="dot"></span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6c1f041e09150d1f041e0d022c0b010d0500420f0301">[email&#160;protected]</a></div>
+      <div><span class="dot"></span><a href="mailto:shreyashran@gmail.com">shreyashran@gmail.com</a></div>
       <nav>
         <a href="#about">about</a>
         <a href="#experience">experience</a>
         <a href="#projects">projects</a>
         <a href="#contact">contact</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">◐</button>
         <a class="resume-btn" href="https://drive.google.com/file/d/1cP_z6DeEV5iLpLzm7TYCrM_e0wRMyFBk/view?usp=sharing" target="_blank" rel="noopener">resume ↗</a>
       </nav>
     </header>
@@ -242,7 +282,7 @@
     <!-- HERO -->
     <section class="hero" style="border-bottom:1px solid var(--rule)">
       <div>
-        <h1>Shreyash<br/>Ranjan<span class="cursor"></span></h1>
+        <h1><span id="typewriter-text"></span><span class="cursor"></span></h1>
         <p class="role">
           CS @ Pitt, graduating Dec 2026. Previously Coinbase, Palantir, Vanguard, Lockheed Martin.
         </p>
@@ -253,7 +293,7 @@
         </div>
       </div>
       <div class="photo-wrap">
-        <image-slot id="hero-photo" placeholder="drop a photo" shape="rect"></image-slot>
+        <img src="assets/images/headshot.jpg" alt="Shreyash Ranjan" id="hero-photo" />
       </div>
     </section>
 
@@ -283,7 +323,6 @@
           <div class="what">
             <span class="co">TBD</span>
             <span class="title">Software Engineer Intern</span>
-            <span class="note">Summer 2026 — details to come</span>
           </div>
           <div class="where">California</div>
         </div>
@@ -383,9 +422,9 @@
           <span class="label">GitHub</span>
           <span class="val">/codingshreyash</span>
         </a>
-        <a href="/cdn-cgi/l/email-protection#27544f55425e46544f55464967404a464e4b0944484a">
+        <a href="mailto:shreyashran@gmail.com">
           <span class="label">Email</span>
-          <span class="val"><span class="__cf_email__" data-cfemail="097a617b6c70687a617b6867496e64686065276a6664">[email&#160;protected]</span></span>
+          <span class="val">shreyashran@gmail.com</span>
         </a>
       </div>
     </section>
@@ -397,7 +436,7 @@
     </footer>
   </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
   // smooth-scroll for in-page anchors
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
     a.addEventListener('click', e=>{
@@ -410,6 +449,65 @@
       }
     });
   });
+
+  // typewriter effect for name
+  function typeWriter() {
+    const text = 'Shreyash\nRanjan';
+    const element = document.getElementById('typewriter-text');
+    let i = 0;
+
+    element.innerHTML = '';
+
+    function type() {
+      if (i < text.length) {
+        const char = text.charAt(i);
+        if (char === '\n') {
+          element.innerHTML += '<br/>';
+        } else {
+          element.innerHTML += char;
+        }
+        i++;
+        setTimeout(type, 150); // typing speed
+      } else {
+        // Wait 7 seconds then restart
+        setTimeout(typeWriter, 7000);
+      }
+    }
+
+    type();
+  }
+
+  // Start typewriter effect when page loads
+  document.addEventListener('DOMContentLoaded', typeWriter);
+
+  // dark mode toggle
+  function initTheme() {
+    const toggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+
+    // Set initial theme
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateToggleText(savedTheme);
+
+    // Toggle functionality
+    toggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateToggleText(newTheme);
+    });
+  }
+
+  function updateToggleText(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    toggle.textContent = theme === 'dark' ? '☀' : '◐';
+    toggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  // Initialize theme on page load
+  document.addEventListener('DOMContentLoaded', initTheme);
 </script>
 </body>
 </html>
