@@ -23,16 +23,54 @@
     --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 
-  /* dark mode / warm amber terminal theme */
+  /* dark mode / cool charcoal technical theme */
   [data-theme="dark"]{
-    --bg:#1a1612;
-    --bg-2:#211d18;
-    --ink:#e8d5a3;
-    --ink-2:#a89070;
-    --muted:#6b5e4a;
-    --rule:#2e281f;
-    --hair:#2a241c;
-    --accent:#f0a500;
+    --bg:#0e0e10;
+    --bg-2:#161618;
+    --ink:#e8e8e8;
+    --ink-2:#a0a0a0;
+    --muted:#555558;
+    --rule:rgba(255,255,255,0.07);
+    --hair:rgba(255,255,255,0.035);
+    --accent:#4f8ef7;
+  }
+
+  /* dark mode specific overrides */
+  [data-theme="dark"] .accent{
+    background:rgba(79,142,247,0.15);
+    color:#4f8ef7;
+    border:1px solid rgba(79,142,247,0.3);
+    padding:1px 4px;
+  }
+
+  [data-theme="dark"] .badge{
+    background:rgba(79,142,247,0.15);
+    color:#4f8ef7;
+    border:1px solid rgba(79,142,247,0.3);
+  }
+
+  [data-theme="dark"] .topbar .resume-btn{
+    background:transparent;
+    border:1px solid #4f8ef7;
+    color:#4f8ef7;
+  }
+
+  [data-theme="dark"] .topbar .resume-btn:hover{
+    background:#4f8ef7;
+    color:var(--bg);
+    border-color:#4f8ef7;
+  }
+
+  [data-theme="dark"] .topbar{
+    border-bottom-color:rgba(255,255,255,0.07);
+  }
+
+  [data-theme="dark"] a.proj:hover{
+    border-color:#4f8ef7;
+  }
+
+  [data-theme="dark"] .gh-card .gh-arrow{
+    color:#4f8ef7;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
@@ -295,12 +333,12 @@
       <div>
         <h1><span id="typewriter-text"></span><span class="cursor"></span></h1>
         <p class="role">
-          CS @ Pitt, graduating Dec 2026. Previously Coinbase, Palantir, Vanguard, Lockheed Martin.
+          CS @ Pitt, graduating December 2026. Previously Coinbase, Palantir, Vanguard, Lockheed Martin.
         </p>
         <div class="meta">
           <span>Pittsburgh, PA</span>
           <span>seeking SWE roles · SF / NYC</span>
-          <span>open to start as early as Jan 2027</span>
+          <span>open to start as early as January 2027</span>
         </div>
       </div>
       <div class="photo-wrap">
