@@ -317,29 +317,14 @@
     align-self:baseline;
   }
 
-  /* document date stamp */
-  :root:not([data-theme="dark"]) .date-stamp{
-    position:absolute;
-    bottom:120px;
-    right:40px;
-    font-size:9px;
-    color:#8b7355;
-    font-style:italic;
-    opacity:0.8;
-    transform:rotate(1deg);
-  }
+  /* document styling complete */
 
   /* mobile adjustments for notebook effects */
   @media (max-width: 640px){
     :root:not([data-theme="dark"]) .margin-note{
       display:none;
     }
-    :root:not([data-theme="dark"]) .date-stamp{
-      position:static;
-      text-align:center;
-      margin:24px 0 12px;
-      transform:none;
-    }
+    /* mobile notebook adjustments */
     :root:not([data-theme="dark"]) .hero::after{
       width:25px;
       height:25px;
@@ -437,9 +422,6 @@
         <a class="resume-btn" href="https://drive.google.com/file/d/1cP_z6DeEV5iLpLzm7TYCrM_e0wRMyFBk/view?usp=sharing" target="_blank" rel="noopener">resume ↗</a>
       </nav>
     </header>
-
-    <!-- DOCUMENT DATE STAMP -->
-    <div class="date-stamp">drafted: Jan 2025 · updated: May 2026</div>
 
     <!-- THEME TOGGLE -->
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">◐</button>
