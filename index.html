@@ -1,815 +1,415 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shreyash Ranjan</title>
-  <link rel="shortcut icon" href="./assets/images/logo.ico" type="image/x-icon">
-  <link rel="stylesheet" href="./assets/css/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Shreyash Ranjan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script src="image-slot.js"></script>
+<style>
+  :root{
+    --bg:#f4f1ec;
+    --bg-2:#ebe7df;
+    --ink:#111111;
+    --ink-2:#3a3a37;
+    --muted:#7a7770;
+    --rule:#1a1a1a;
+    --hair:#cfcabf;
+    --accent:#111111;
+    --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
+  body{
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    background-image:
+      linear-gradient(var(--hair) 1px, transparent 1px);
+    background-size: 100% 28px;
+    background-position: 0 -1px;
+    background-attachment: local;
+  }
+  /* container */
+  .wrap{max-width:880px;margin:0 auto;padding:48px 40px 96px;background:var(--bg);}
+  @media (max-width: 640px){
+    .wrap{padding:32px 20px 80px}
+    body{font-size:13px}
+  }
+
+  /* top bar */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:14px;border-bottom:1px solid var(--rule);
+    font-size:12px;letter-spacing:0.02em;color:var(--ink-2);
+  }
+  .topbar .dot{display:inline-block;width:8px;height:8px;background:var(--ink);border-radius:50%;margin-right:8px;vertical-align:1px}
+  .topbar a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+  .topbar a:hover{border-bottom-color:var(--ink)}
+  .topbar nav{display:flex;gap:18px;align-items:center}
+  .topbar .resume-btn{
+    border:1px solid var(--ink);padding:4px 10px;
+    background:var(--ink);color:var(--bg);
+    transition:background .15s ease, color .15s ease;
+  }
+  .topbar .resume-btn:hover{background:var(--bg);color:var(--ink);border-bottom-color:var(--ink)}
+
+  /* hero */
+  .hero{
+    padding:72px 0 56px;
+    display:grid;grid-template-columns: 1fr 160px;gap:40px;align-items:start;
+    border-bottom:1px solid var(--rule);
+  }
+  @media (max-width: 640px){
+    .hero{grid-template-columns:1fr;padding:48px 0 40px;gap:28px}
+  }
+  .hero h1{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size: clamp(32px, 5.2vw, 56px);
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    margin:0 0 18px;
+  }
+  .hero h1 .cursor{
+    display:inline-block;width:.5em;height:1em;background:var(--ink);
+    transform:translateY(.12em);margin-left:.08em;
+    animation:blink 1s steps(2) infinite;
+  }
+  @keyframes blink{50%{opacity:0}}
+  .hero .role{
+    color:var(--ink-2);max-width:46ch;text-wrap:pretty;
+    font-size:14px;
+  }
+  .hero .role .k{color:var(--muted)}
+  .hero .meta{
+    margin-top:22px;display:flex;flex-wrap:wrap;gap:12px 22px;
+    font-size:12px;color:var(--ink-2);
+  }
+  .hero .meta span::before{content:"// ";color:var(--muted)}
+
+  .photo-wrap{
+    width:160px;height:200px;
+    border:1px solid var(--rule);
+    background:var(--bg-2);
+    position:relative;
+  }
+  .photo-wrap image-slot{width:100%;height:100%;display:block}
+  .photo-cap{
+    position:absolute;left:0;right:0;bottom:-22px;
+    font-size:10px;color:var(--muted);text-align:center;
+    letter-spacing:0.06em;
+  }
+  @media (max-width: 640px){
+    .photo-wrap{width:120px;height:150px}
+  }
+
+  /* sections */
+  section{padding:48px 0;border-bottom:1px dashed var(--hair)}
+  section:last-of-type{border-bottom:none}
+  .h2{
+    display:flex;align-items:baseline;gap:14px;
+    font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 28px;font-weight:500;
+  }
+  .h2::before{content:"§";color:var(--ink);font-weight:700}
+  .h2 .num{color:var(--ink);font-weight:700}
+  .h2 .rule{flex:1;height:1px;background:var(--hair)}
+
+  /* about */
+  .about p{font-size:15px;line-height:1.7;color:var(--ink);max-width:62ch;margin:0 0 14px;text-wrap:pretty}
+  .about p:last-child{margin-bottom:0}
+  .about .accent{background:var(--ink);color:var(--bg);padding:1px 5px}
+  .about .link{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink)}
+  .about .link:hover{background:var(--ink);color:var(--bg)}
+
+  /* experience */
+  .xp{display:flex;flex-direction:column;gap:0}
+  .row{
+    display:grid;grid-template-columns: 170px 1fr auto;gap:32px;
+    padding:20px 0;border-top:1px solid var(--hair);
+    align-items:baseline;
+  }
+  .row:first-child{border-top:1px solid var(--rule)}
+  .row:last-child{border-bottom:1px solid var(--rule)}
+  .row.divider{border-top:1px solid var(--rule)}
+  .row:hover{background:var(--bg-2)}
+  .row .when{font-size:12px;color:var(--muted);white-space:nowrap;letter-spacing:0.01em}
+  .row .when .ongoing{color:var(--ink-2)}
+  .row .what{font-size:14px;min-width:0}
+  .row .what .co{font-weight:700}
+  .row .what .title{color:var(--ink-2);display:block;margin-top:2px;font-size:13px}
+  .row .what .note{color:var(--muted);font-size:12px;margin-top:4px;display:block}
+  .row .where{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+  @media (max-width: 640px){
+    .row{grid-template-columns:1fr;gap:4px;padding:16px 0}
+    .row .where{text-align:left}
+  }
+
+  /* highlight badge for current role */
+  .badge{
+    display:inline-block;font-size:10px;letter-spacing:0.08em;
+    background:var(--ink);color:var(--bg);padding:2px 6px;margin-left:6px;
+    transform:translateY(-1px);text-transform:uppercase;
+  }
+
+  /* projects */
+  .proj-note{
+    font-size:13px;color:var(--ink-2);max-width:62ch;text-wrap:pretty;
+    margin:0 0 24px;
+  }
+  .gh-card{
+    border:1px solid var(--rule);background:var(--bg-2);
+    padding:20px 22px;
+    display:flex;justify-content:space-between;align-items:center;gap:20px;
+    text-decoration:none;color:var(--ink);
+    transition:background .15s ease;
+  }
+  .gh-card:hover{background:var(--ink);color:var(--bg)}
+  .gh-card:hover .gh-arrow{transform:translateX(4px)}
+  .gh-card .gh-handle{font-weight:700;font-size:15px}
+  .gh-card .gh-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .gh-card:hover .gh-sub{color:var(--bg-2)}
+  .gh-arrow{font-size:18px;transition:transform .15s ease}
+
+  .proj-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
+    background:var(--hair);
+    margin-top:24px;border:1px solid var(--hair);
+  }
+  @media (max-width: 640px){.proj-grid{grid-template-columns:1fr}}
+  .proj{
+    background:var(--bg);padding:18px 20px;
+    display:flex;flex-direction:column;gap:6px;min-height:110px;
+    text-decoration:none;color:inherit;
+    transition:background .15s ease;
+  }
+  a.proj:hover{background:var(--bg-2)}
+  a.proj:hover .pname::before{color:var(--ink)}
+  .proj .pname{font-weight:700;font-size:13px;display:flex;align-items:center;gap:8px}
+  .proj .pname::before{content:"▸";color:var(--muted)}
+  .proj .pdesc{font-size:12px;color:var(--ink-2);line-height:1.55}
+  .proj .ptag{font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-top:auto}
+
+  /* contact */
+  .contact-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--hair);border:1px solid var(--rule);
+  }
+  @media (max-width: 640px){.contact-grid{grid-template-columns:1fr}}
+  .contact-grid a{
+    background:var(--bg);padding:18px 20px;
+    text-decoration:none;color:var(--ink);
+    display:flex;flex-direction:column;gap:4px;
+    transition:background .15s ease;
+  }
+  .contact-grid a:hover{background:var(--ink);color:var(--bg)}
+  .contact-grid .label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+  .contact-grid a:hover .label{color:var(--bg-2)}
+  .contact-grid .val{font-size:14px;font-weight:500;word-break:break-all}
+
+  /* footer */
+  footer{
+    margin-top:64px;padding-top:18px;
+    border-top:1px solid var(--rule);
+    display:flex;justify-content:space-between;
+    font-size:11px;color:var(--muted);letter-spacing:0.04em;
+  }
+  footer .ascii{white-space:pre;color:var(--muted);font-size:10px;line-height:1.2}
+
+  /* utility */
+  .kbd{
+    font-size:11px;border:1px solid var(--hair);padding:1px 5px;border-radius:2px;
+    color:var(--ink-2);background:var(--bg);
+  }
+</style>
 </head>
-
 <body>
-  <main>
-    <aside class="sidebar" data-sidebar>
-      <div class="sidebar-info">
-
-        <figure class="avatar-box">
-          <img src="./assets/images/my-avatar.png" alt="Shreyash Ranjan" width="80">
-        </figure>
-
-        <div class="info-content">
-          <h1 class="name" title="Shreyash Ranjan">Shreyash Ranjan</h1>
-
-          <p class="title">Software Engineer</p>
-        </div>
-
-        <button class="info_more-btn" data-sidebar-btn>
-          <span>Show Contacts</span>
-
-          <ion-icon name="chevron-down"></ion-icon>
-        </button>
-
-      </div>
-
-      <div class="sidebar-info_more">
-
-        <div class="separator"></div>
-
-        <ul class="contacts-list">
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="mail-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Email</p>
-
-              <a href="mailto:shreyashran@example.com" class="contact-link">shreyashran@gmail.com</a>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="phone-portrait-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Phone</p>
-
-              <a href="tel:+2673704947" class="contact-link">+1 (267) 370-4947</a>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="calendar-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Graduation</p>
-
-              <time datetime="1982-06-23">April 2026</time>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="location-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Location</p>
-
-              <address>Philadelphia, Pennslyvania, USA</address>
-            </div>
-
-          </li>
-
-        </ul>
-
-        <div class="separator"></div>
-
-        <ul class="social-list">
-
-        
-
-         
-          <li class="social-item">
-            <a href="https://www.linkedin.com/in/shreyash-ranjan/" class="social-link">
-              <ion-icon name="logo-linkedin"></ion-icon>
-            </a>
-          </li>  <li class="social-item">
-            <a href="https://www.linkedin.com/in/shreyash-ranjan/" class="social-link">
-              <ion-icon name="logo-linkedin"></ion-icon>
-            </a>
-          </li>
-          <li class="social-item">
-            <a href="https://www.linkedin.com/in/shreyash-ranjan/" class="social-link">
-              <ion-icon name="logo-linkedin"></ion-icon>
-            </a>
-          </li>
-
-        </ul>
-
-      </div>
-
-    </aside>
-    <div class="main-content">
-      <nav class="navbar">
-        <ul class="navbar-list">
-          <li class="navbar-item">
-            <button class="navbar-link  active" data-nav-link>About</button>
-          </li>
-          <li class="navbar-item">
-            <button class="navbar-link" data-nav-link>Resume</button>
-          </li>
-          <li class="navbar-item">
-            <button class="navbar-link" data-nav-link>Portfolio</button>
-          </li>
-          <li class="navbar-item">
-            <button class="navbar-link" data-nav-link>Contact</button>
-          </li>
-        </ul>
+  <div class="wrap" data-screen-label="Home">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div><span class="dot"></span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6c1f041e09150d1f041e0d022c0b010d0500420f0301">[email&#160;protected]</a></div>
+      <nav>
+        <a href="#about">about</a>
+        <a href="#experience">experience</a>
+        <a href="#projects">projects</a>
+        <a href="#contact">contact</a>
+        <a class="resume-btn" href="https://drive.google.com/file/d/1cP_z6DeEV5iLpLzm7TYCrM_e0wRMyFBk/view?usp=sharing" target="_blank" rel="noopener">resume ↗</a>
       </nav>
-      <article class="about  active" data-page="about">
-        <header>
-          <h2 class="h2 article-title">About me </h2>
-        </header>
-        <section class="about-text">
-          <p>
-            Hi, my name is Shreyash! I'm a Software Engineer based out of Philadelphia, PA, currently studying at the University of Pittsburgh pursuing a <i>double</i> major: <b>BS in Computer Science & BS in Data Sciences </b>.
-          </p>
-          <p>
-            I have been employed by the world's largest defense contractor, <b>Lockheed Martin</b>. Over the past two years, I've worked as a Software Engineering Intern. During my internship, I worked on Rotary and Mission Systems IT Web Applications, and later, I transitioned into a role as a Cyber-Software Engineering Intern, where I supported the protection of Lockheed Martin's Cloud Service Providers. This upcoming Summer (2024) I will be switching companies to join the <b>Vanguard</b> group out of their head quarters in Malvern PA. Supporting their Risk and Security team. 
-          </p>
-          <p>
-            I have a genuine passion for computer science and enjoy problem-solving. Please check out my resume and portfolio tabs to learn more about the work I've done. Thank you for visiting my personal site, and feel free to get in touch anytime!
-          </p>
-        </section>
-        <section class="service">
+    </header>
 
-          <h3 class="h3 service-title">What i'm doing</h3>
-
-          <ul class="service-list">
-
-            <li class="service-item">
-
-              <div class="service-icon-box">
-                <img src="./assets/images/icon-design.svg
-                " alt="design icon" width="40">
-              </div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Full Stack Development</h4>
-
-                <p class="service-item-text">
-                  I create high-end web pages, utilizing a diverse tech stack that includes React, Python, Angular, Node, and more.
-                </p>
-              </div>
-            </li>
-            <li class="service-item">
-
-              <div class="service-icon-box">
-                <img src="./assets/images/icon-dev.svg" alt="Web development icon" width="40">
-              </div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Personal Projects</h4>
-                <p class="service-item-text">
-                  I constantly challenge myself with personal projects to stay up-to-date and proficient in the latest technologies.
-                </p>
-              </div>
-            </li>
-            <li class="service-item">
-              <div class="service-icon-box">
-                <img src="./assets/images/icon-app.svg" alt="mobile app icon" width="40">
-              </div>
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Applications</h4>
-
-                <p class="service-item-text">
-                  I specialize in crafting innovative applications, spanning from immersive VR and AR experiences to sleek mobile apps.
-                </p>
-              </div>
-
-            </li>
-
-            <li class="service-item">
-
-              <div class="service-icon-box">
-                <img src="./assets/images/icon-photo.svg" alt="camera icon" width="40">
-              </div>
-
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Vision</h4>
-
-                <p class="service-item-text">
-                  I am learning various vision systems to help develop the first fully autonomous panther racing car, harnessing the power of technologies such as TensorFlow, OpenCV, and LiDAR.
-                </p>
-              </div>
-
-            </li>
-
-          </ul>
-
-        </section>
-        <section class="testimonials">
-          <h3 class="h3 testimonials-title">Recommendations</h3>
-
-          <ul class="testimonials-list has-scrollbar">
-
-            <li class="testimonials-item">
-              <div class="content-card" data-testimonials-item>
-
-                <figure class="testimonials-avatar-box">
-                  <img src="./assets/images/avatar-1.png" alt="Daniel lewis" width="60" data-testimonials-avatar>
-                </figure>
-
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>John Gurczynski</h4>
-
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                    Shreyash is nothing short of an incredibly hard worker, a skilled problem solver, and a dedicated mind. 
-                    In my time working with him on either projects or for fun, he has displayed incredible technical skills 
-                    and when paired with his impressive knack for critical thinking, there isn't any task I haven't seen him 
-                    rise to the occasion for. On a team, he plays excellently into the team both as a member and as a leader, 
-                    blending his strengths and weaknesses well with everyone else present. On a solo side, he has displayed 
-                    impressive levels of self-control and organization when managing his time effectively. Overall, 
-                    Shreyash is a great leader, team member, and friend.
-                  </p>
-                </div>
-
-              </div>
-            </li>
-
-            <li class="testimonials-item">
-              <div class="content-card" data-testimonials-item>
-
-                <figure class="testimonials-avatar-box">
-                  <img src="./assets/images/avatar-2.png" alt="Jessica miller" width="60" data-testimonials-avatar>
-                </figure>
-
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>Krishna Katakota</h4>
-                
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                    It has been a pleasure collaborating with Shreyash during our tenure on the Tech-Knight Robotics 
-                    team and as co-interns at Lockheed Martin. Our shared experiences in robotics and Code Quest have 
-                    showcased his impressive technical aptitude across a range of programming languages, highlighted by his consistent 
-                    application of good coding practices and a focus on efficiency. Shreyash's meticulous and analytical approach is evident 
-                    in his outstanding problem-solving abilities, which enable him to dissect complex challenges and devise innovative, effective solutions. 
-                    Working with him is delightful, and his insight is always valuable and concisely productive. 
-                  </p>
-                </div>
-
-              </div>
-            </li>
-
-            <li class="testimonials-item">
-              <div class="content-card" data-testimonials-item>
-
-                <figure class="testimonials-avatar-box">
-                  <img src="./assets/images/avatar-3.png" alt="Manisha Chauhan" width="60" data-testimonials-avatar>
-                </figure>
-
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>Manisha Chauhan</h4>
-
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                    It has been a pleasure working with Shreyash for the past few weeks on the launch of our new website. Shreyash continues to impress me with his talent. He is hard-working, dedicated and mature beyond his age. He works with great efficiency and has excellent communication skills. His knowledge in website design and ideas have been extremely helpful as we work towards the grand opening of our new restaurant.
-                  </p>
-                </div>
-
-              </div>
-            </li>
-
-            <li class="testimonials-item">
-              <div class="content-card" data-testimonials-item>
-
-                <figure class="testimonials-avatar-box">
-                  <img src="./assets/images/ava.png" alt="Ohm Patel" width="60" data-testimonials-avatar>
-                </figure>
-
-                <h4 class="h4 testimonials-item-title" data-testimonials-title>Ohm Patel</h4>
-
-                <div class="testimonials-text" data-testimonials-text>
-                  <p>
-                    I had the pleasure of working with Shreyash, an exceptional team captain during my time on the Tech-Knight Robotics team. 
-                    Despite joining mid-season, I was immediately impressed by his dedication, leadership, and commitment to the growth of every team member. 
-                    Shreyash equipped each new member with essential robotic and programming skills, ranging from teaching Java programming to emphasizing the 
-                    significance of gear ratios, ensuring each member’s readiness for success. Personally, his guidance helped me discover my passion and the right 
-                    role within the team. He fostered an inclusive environment, valuing and incorporating everyone's contributions, which created a collaborative atmosphere. 
-                  </p>
-                </div>
-
-              </div>
-            </li>
-
-          
-
-            
-
-    
-
-          </ul>
-
-        </section>
-
-        <div class="modal-container" data-modal-container>
-
-          <div class="overlay" data-overlay></div>
-
-          <section class="testimonials-modal">
-
-            <button class="modal-close-btn" data-modal-close-btn>
-              <ion-icon name="close-outline"></ion-icon>
-            </button>
-
-            <div class="modal-img-wrapper">
-              <figure class="modal-avatar-box">
-                <img src="./assets/images/avatar-1.png" alt="Daniel lewis" width="80" data-modal-img>
-              </figure>
-
-              <img src="./assets/images/icon-quote.svg" alt="quote icon">
-            </div>
-
-            <div class="modal-content">
-
-              <h4 class="h3 modal-title" data-modal-title>Daniel lewis</h4>
-
-              
-
-              <div data-modal-text>
-                <p>
-                  Shreyash is nothing short of an incredibly hard worker, a skilled problem solver, and a dedicated mind. In my time working with him on either projects or for fun, he has displayed incredible technical skills and when paired with his impressive knack for critical thinking, there isn't any task I haven't seen him rise to the occasion for. On a team, he plays excellently into the team both as a member and as a leader, blending his strengths and weaknesses well with everyone else present. On a solo side, he has displayed impressive levels of self-control and organization when managing his time effectively. Overall, Shreyash is a great leader, team member, and friend.
-                </p>
-              </div>
-
-            </div>
-
-          </section>
-
+    <!-- HERO -->
+    <section class="hero" style="border-bottom:1px solid var(--rule)">
+      <div>
+        <h1>Shreyash<br/>Ranjan<span class="cursor"></span></h1>
+        <p class="role">
+          CS @ Pitt, graduating Dec 2026. Previously Coinbase, Palantir, Vanguard, Lockheed Martin.
+        </p>
+        <div class="meta">
+          <span>Pittsburgh, PA</span>
+          <span>seeking SWE roles · SF / NYC</span>
+          <span>open to start as early as Jan 2027</span>
         </div>
-        <section class="clients">
-        </section>
+      </div>
+      <div class="photo-wrap">
+        <image-slot id="hero-photo" placeholder="drop a photo" shape="rect"></image-slot>
+      </div>
+    </section>
 
-      </article>
-      <article class="resume" data-page="resume">
-        <header>
-          <h2 class="h2 article-title">Resume <a class="h4 timeline-item-title" href="assets/Shreyash_Ranjan_Resume.pdf" download="proposed_file_name">Download a copy</a></h2>
-        </header>
+    <!-- ABOUT -->
+    <section id="about" class="about">
+      <h2 class="h2"><span class="num">01</span> about<span class="rule"></span></h2>
+      <p>
+        I started writing software professionally at <span class="accent">16</span> — my first
+        internship was at Lockheed Martin, where I ended up being the youngest intern they'd ever
+        hired. Since then I've worked across security, fraud, and AI infrastructure at Vanguard,
+        Palantir, and Coinbase.
+      </p>
+      <p>
+        I'm finishing my CS degree at Pitt and looking for <span class="accent">new-grad SWE roles</span>
+        in SF or NYC — open to start as early as <span class="accent">Jan 2027</span>. Outside
+        of work I play pickleball, go for hikes, love trying new coffee, and build cool projects.
+      </p>
+    </section>
 
-        <section class="timeline">
+    <!-- EXPERIENCE -->
+    <section id="experience">
+      <h2 class="h2"><span class="num">02</span> experience<span class="rule"></span></h2>
+      <div class="xp">
 
-          <div class="title-wrapper">
-            <div class="icon-box">
-              <ion-icon name="book-outline"></ion-icon>
-            </div>
-
-            <h3 class="h3">Education</h3>
+        <div class="row divider">
+          <div class="when">May — Aug 2026</div>
+          <div class="what">
+            <span class="co">TBD</span>
+            <span class="title">Software Engineer Intern</span>
+            <span class="note">Summer 2026 — details to come</span>
           </div>
+          <div class="where">California</div>
+        </div>
 
-          <ol class="timeline-list">
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">University of Pittsburgh</h4>
-              <span>2023 — 2026 <i>GPA: 3.9/4.0</i></span>
-              <p class="timeline-text">
-                Pursuing a <b>BS in Computer Science & BS in Data Sciences</b> at the School of Computing and Information (SCI). 
-
-              </p>
-              <br> </br>
-            <p class="timeline-text">
-                <b>Relvant coursework:</b> Data Structures & Algorithms, Discrete Structures, Assembly Language & Computer Organization,
-                Systems Software, Cybersecurity, Web Design, Data Science Foundations, Database Management.. 
-              </p>
-            </li>
-        </section>
-
-        <section class="timeline">
-          <div class="title-wrapper">
-            <div class="icon-box">
-              <ion-icon name="book-outline"></ion-icon>
-            </div>
-            <h3 class="h3">Experience</h3>
+        <div class="row">
+          <div class="when">May 2025 — May 2026</div>
+          <div class="what">
+            <span class="co">Coinbase</span>
+            <span class="title">Software Engineer Intern · Security / IAM</span>
           </div>
-
-
-          
-
-          <ol class="timeline-list">
-
-            <li class="timeline-item">
-              <h4 class="h4 timeline-item-title">Risk & Security Engineering Intern | <i> Vanguard </i> </h4>
-              <span>May 2024 — Present</span>
-
-              <p class="timeline-text">
-                - Member of the Risk and Security team, focusing on enhancing safeguards and mitigating potential fraud 
-                
-                <p class="timeline-text">
-                
-              </p>
-              
-            <p class="timeline-text"> 
-              </p>
-          
-            </li>
-
-
-            <li class="timeline-item">
-
-              <h4 class="h4 timeline-item-title">Cyber-Software Engineer Intern | <i> Lockheed Martin </i> </h4>
-
-              <span>April 2022 — August 2023</span>
-
-              <p class="timeline-text">
-                - Saved over $500K in annual cost savings by implementing cloud cost controls using AWS Cost Usage Reports (CUR), and developed cost dashboards with Athena and Tableau to present insights to senior management.
-              </p> 
-                <p class="timeline-text">
-                - Enhanced the security, efficiency, and resiliency of a government AWS cloud infrastructure by implementing strategic optimizations with the utilization of boto3 and Moto.
-  
-              </p>
-            <p class="timeline-text">
-              - Collaborated with DevOps engineers to enhance system features by implementing code quality controls via service control policies (SCPs) using AWS Config. Employed Test-Driven Development (TDD) practices to ensure robustness and reliability.
-              </p>
-              <p class="timeline-text">
-                - Containerized workflow code through Dockerization, seamlessly integrating it into the existing AWS infrastructure using robust CI/CD pipelines.
-                </p>
-
-            </li>
-
-<li class="timeline-item">
-
-  <h4 class="h4 timeline-item-title">Software Engineer Intern | <i> Lockheed Martin </i> </h4>
-
-  <span>June 2021 — April 2022</span>
-
-  <p class="timeline-text">
-    - Crafted dynamic web applications for Rotary and Mission Systems IT using full-stack web development expertise within an Agile framework, contributing to streamlined processes and enhanced user experiences.
-    <p class="timeline-text">
-      - Partnered with cross-functional teams to design and implement a user-centric webpage, empowering Engineering Organizations to adeptly track and manage problem reports, thereby optimizing workflow efficiency.
-   
-  </p>
-<p class="timeline-text">
-  - Revitalized a pivotal webpage facilitating seamless communication between Sikorsky and suppliers. Implemented robust versioning and source control mechanisms using TFS and Git, significantly boosting collaboration, efficiency, and overall project success.
-  </p>
-
-</li>
-
-<li class="timeline-item">
-  <h4 class="h4 timeline-item-title">Chief Technology Officer | <i> InvestIQ </i> </h4>
-  <span>August 2023 — December 2023</span>
-
-  <p class="timeline-text">
-    - Founded InvestIQ, conceptualizing and leading the development of a predictive machine learning model for stock market analysis.
-    
-    <p class="timeline-text">
-    - Developed a stock market predictive machine learning model using Python to train and refine the model on historical market data and key technical indicators resulting in a 7.5% increase than industry norms.
-  </p>
-  
-<p class="timeline-text"> - Implemented and integrated 8 APIs to efficiently retrieve and process large datasets, leveraging neural network code for accurate and reliable predictions.
-  </p>
-
-</li>
-<li class="timeline-item">
-  <h4 class="h4 timeline-item-title">Autonomous Systems Engineer | <i> Panther Racing </i> </h4>
-  <span>August 2023 — December 2023</span>
-
-  <p class="timeline-text">
-    - Contributing to the development of a fully autonomous model car in a ROS (Robot Operating System) environment, enabling it to navigate a cone course without manual intervention.
-    
-    <p class="timeline-text">
-    - Integrating various components such as motor/steering control, point cloud processing, and planning algorithms to ensure seamless autonomous operation.
-  </p>
-  
-<p class="timeline-text"> - Implementing cutting-edge sensor technologies including LiDAR, OpenCV, and SLAM (simultaneous localization and mapping) for accurate perception and navigation, laying the groundwork for the organization's full-scale FSAE (Formula Society of Automotive Engineers) car's autonomous capabilities.
-  </p>
-
-</li>
-<li class="timeline-item">
-
-  <h4 class="h4 timeline-item-title">Production Intern | <i> Team Cybis </i> </h4>
-
-  <span>April 2023 — July 2023</span>
-
-  <p class="timeline-text">
-    - Gained hands-on media production experience, contributing to live events.
-    <p class="timeline-text">
-      - Operated Tricaster board for multi-camera live productions at the first PA-FBLA State Leadership Conference in the Giant Center, attended by over 5,000 members
-   
-  </p>
-<p class="timeline-text">
-  - Returned as an intern in Atlanta's Georgia World Congress Center, attended by over 13,000 members.
-  </p>
-
-
-</li>
-
-<li class="timeline-item">
-
-  <h4 class="h4 timeline-item-title">National Eastern Region Programs Director | <i> FBLA </i> </h4>
-
-  <span>September 2022 — July 2023</span>
-
-  <p class="timeline-text">
-    - Eastern Region Programs Director, serving over 39,000 members in Eastern Region states, orchestrating strategic initiatives and programs for member engagement and growth.
-    <p class="timeline-text">
-      - Authored comprehensive toolkits for networking and FBLA 101, delivering impactful resources to over 190,000 members. These materials facilitated skill development and knowledge sharing within the organization
-   
-  </p>
-<p class="timeline-text">
-  - Initiated and hosted national networking nights, fostering valuable connections among members and providing a platform for skill exchange and professional growth.
-  </p>
-  <p class="timeline-text">
-    - Developed, implemented, and managed a comprehensive program of work, aligning organizational goals with actionable plans and successfully executing initiatives to drive member involvement and success.
-    </p>
-
-</li>
-<li class="timeline-item">
-
-  <h4 class="h4 timeline-item-title">Team Captain | <i> FTC Robotics Team #16606 </i> </h4>
-
-  <span>September 2019 — March 2023</span>
-
-  <p class="timeline-text">
-    - Led a 10-member student team to compete at the Pennsylvania FIRST Tech Challenge State championship.
-    <p class="timeline-text">
-      - Programmed the robot autonomously using Java, OpenCV, and motion profiling systems
-   
-  </p>
-<p class="timeline-text">
-  - Established partnerships with 15+ companies, securing $2,750 in funding.
-  </p>
-  <p class="timeline-text">
-    - Collaborated on CAD models using SOLIDWORKS and guided teammates in robot assembly following the engineering design process.
-    </p>
-
-</li>
-
-            
-
-          </ol>
-
-        </section>
-
-        <section class="skill">
-
-          <h3 class="h3 skills-title">My skills</h3>
-
-          <ul class="skills-list content-card">
-
-            <li class="skills-item">
-        
-             <p class="timeline-text"><b>LANGUAGES: </b> <i>Java, JavaScript, Python, Swift, C# (Unity, .NET), C, C++, SQL, HTML5, CSS </i></p>
-             <p class="timeline-text"><b>LIBRARIES/FRAMEWORKS: </b> <i>Angular 9, Node.js, React, pandas, React Native, PyTorch, Docker, Agile </i></p>
-             <p class="timeline-text"><b>AMAZON WEB SERVICES: </b> <i>EC2, Lambda, API Gateway, CloudFormation, S3, RDS, Elasticsearch, Config, Kubernetes </i></p>
-             <p class="timeline-text"><b>CERTIFICATIONS: </b> <i>Cloud Essentials, JIRA Fundamentals, Data Science Methodologies</i></p>
-
-             
-
-           
-
-          </ul>
-
-        </section>
-
-      </article>
-
-      <article class="portfolio" data-page="portfolio">
-
-        <header>
-          <h2 class="h2 article-title">Portfolio</h2>
-        </header>
-
-        <section class="projects">
-
-          <ul class="filter-list">
-
-            <li class="filter-item">
-              <button class="active" data-filter-btn>All</button>
-            </li>
-
-            <li class="filter-item">
-              <button data-filter-btn>Web design</button>
-            </li>
-
-            <li class="filter-item">
-              <button data-filter-btn>Applications</button>
-            </li>
-
-            <li class="filter-item">
-              <button data-filter-btn>Research</button>
-            </li>
-
-          </ul>
-
-          <div class="filter-select-box">
-
-            <button class="filter-select" data-select>
-
-              <div class="select-value" data-selecct-value>Select category</div>
-
-              <div class="select-icon">
-                <ion-icon name="chevron-down"></ion-icon>
-              </div>
-
-            </button>
-
-            <ul class="select-list">
-
-              <li class="select-item">
-                <button data-select-item>All</button>
-              </li>
-
-              <li class="select-item">
-                <button data-select-item>Web design</button>
-              </li>
-
-              <li class="select-item">
-                <button data-select-item>Applications</button>
-              </li>
-
-              <li class="select-item">
-                <button data-select-item>Research</button>
-              </li>
-
-            </ul>
-
+          <div class="where">New York, NY</div>
+        </div>
+
+        <div class="row">
+          <div class="when">Nov 2024 — Jan 2025</div>
+          <div class="what">
+            <span class="co">Palantir Technologies</span>
+            <span class="title">Fellowship · AIP</span>
           </div>
+          <div class="where">Remote</div>
+        </div>
 
-          <ul class="project-list">
+        <div class="row">
+          <div class="when">May — Aug 2024</div>
+          <div class="what">
+            <span class="co">Vanguard</span>
+            <span class="title">Software Engineer Intern · Fraud</span>
+          </div>
+          <div class="where">Malvern, PA</div>
+        </div>
 
-            <li class="project-item  active" data-filter-item data-category="applications">
-              <a href="https://devpost.com/software/vr-hab-8mo2tu">
+        <div class="row">
+          <div class="when">Jun 2021 — Aug 2023</div>
+          <div class="what">
+            <span class="co">Lockheed Martin</span>
+            <span class="title">Software Engineer Intern · Cyber / Cloud</span>
+          </div>
+          <div class="where">King of Prussia, PA</div>
+        </div>
 
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
+      </div>
 
-                  <img src="./assets/images/Picture1.jpg" alt="VR-Hab" loading="lazy">
-                </figure>
+      <div style="margin-top:20px;font-size:12px;color:var(--muted)">
+        <span style="color:var(--ink)">↳</span> University of Pittsburgh, B.S. Computer Science · December 2026
+      </div>
+    </section>
 
-                <h3 class="project-title">VR-Hab </h3>
+    <!-- PROJECTS -->
+    <section id="projects">
+      <h2 class="h2"><span class="num">03</span> projects<span class="rule"></span></h2>
 
-                <p class="project-category">Applications</p>
+      <p class="proj-note">
+        I build a lot — most of it lives on GitHub. Below is the full archive; a few highlights are pinned.
+      </p>
 
-              </a>
-            </li>
+      <a class="gh-card" href="https://github.com/codingshreyash" target="_blank" rel="noopener">
+        <div>
+          <div class="gh-handle">github.com/codingshreyash</div>
+          <div class="gh-sub">complete archive · personal projects, hackathon wins, experiments</div>
+        </div>
+        <div class="gh-arrow">→</div>
+      </a>
 
-            <li class="project-item  active" data-filter-item data-category="web development">
-              <a href="https://devpost.com/software/tuter-mb6los">
+      <div class="proj-grid">
+        <a class="proj" href="https://github.com/codingshreyash/Classhi" target="_blank" rel="noopener">
+          <div class="pname">Classhi</div>
+          <div class="pdesc">Kalshi-style prediction markets for CS lectures.</div>
+          <div class="ptag">github.com/codingshreyash/Classhi</div>
+        </a>
+        <a class="proj" href="https://github.com/braynguyen/The-Social-Space" target="_blank" rel="noopener">
+          <div class="pname">The Social Space</div>
+          <div class="pdesc">A 3D visualization of the TikTok algorithm on the web.</div>
+          <div class="ptag">github.com/braynguyen/The-Social-Space</div>
+        </a>
+        <a class="proj" href="https://github.com/krishnakatakota/VR-Hab" target="_blank" rel="noopener">
+          <div class="pname">VR-Hab</div>
+          <div class="pdesc">VR-based rehabilitation for neurological recovery.</div>
+          <div class="ptag">github.com/krishnakatakota/VR-Hab</div>
+        </a>
+        <a class="proj" href="https://github.com/codingshreyash/bastion" target="_blank" rel="noopener">
+          <div class="pname">Bastion</div>
+          <div class="pdesc">Portfolio intelligence system: lot-level tracking, volatility-adjusted stops, and automated ETF overlap / fee-drag analysis.</div>
+          <div class="ptag">github.com/codingshreyash/bastion</div>
+        </a>
+      </div>
+    </section>
 
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
+    <!-- CONTACT -->
+    <section id="contact">
+      <h2 class="h2"><span class="num">04</span> contact<span class="rule"></span></h2>
+      <div class="contact-grid">
+        <a href="https://www.linkedin.com/in/shreyash-ranjan/" target="_blank" rel="noopener">
+          <span class="label">LinkedIn</span>
+          <span class="val">/in/shreyash-ranjan</span>
+        </a>
+        <a href="https://github.com/codingshreyash" target="_blank" rel="noopener">
+          <span class="label">GitHub</span>
+          <span class="val">/codingshreyash</span>
+        </a>
+        <a href="/cdn-cgi/l/email-protection#27544f55425e46544f55464967404a464e4b0944484a">
+          <span class="label">Email</span>
+          <span class="val"><span class="__cf_email__" data-cfemail="097a617b6c70687a617b6867496e64686065276a6664">[email&#160;protected]</span></span>
+        </a>
+      </div>
+    </section>
 
-                  <img src="./assets/images/project-2.jpg" alt="Tuber" loading="lazy">
-                </figure>
+    <!-- FOOTER -->
+    <footer>
+      <div>© 2026 · shreyash ranjan</div>
+      <div class="ascii">[ end of file ]</div>
+    </footer>
+  </div>
 
-                <h3 class="project-title">Tuber</h3>
-
-                <p class="project-category">Web development</p>
-
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="applications">
-              <a href="https://github.com/codingshreyash/KolbAcademy">
-
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-
-                  <img src="./assets/images/project-3.png" alt="Kolb Academy" loading="lazy">
-                </figure>
-
-                <h3 class="project-title">Kolb Academy</h3>
-
-                <p class="project-category">Applications</p>
-
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="https://devpost.com/software/ezstudy">
-
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-
-                  <img src="./assets/images/project-4.png" alt="EZStudy" loading="lazy" >
-                </figure>
-
-                <h3 class="project-title">EZStudy</h3>
-
-                <p class="project-category">Web design</p>
-
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="research">
-              <a href="https://drive.google.com/file/d/129XXt0hKM4PEDsi5SunqAFds2-ZYUODb/view">
-
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-
-                  <img src="./assets/images/project-5.png" alt="ChirpChat" loading="lazy">
-                </figure>
-
-                <h3 class="project-title">ChirpChat</h3>
-
-                <p class="project-category">Research</p>
-
-              </a>
-            </li>
-
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="https://halal-indo-chineese.github.io/">
-
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-
-                  <img src="./assets/images/project-6.png" alt="Restaurant Website" loading="lazy">
-                </figure>
-
-                <h3 class="project-title">Restaurant Website</h3>
-
-                <p class="project-category">Web design</p>
-
-              </a>
-            </li>
-
-
-          </ul>
-
-        </section>
-
-      </article>
-
-
-      <article class="contact" data-page="contact">
-
-        <header>
-          <h2 class="h2 article-title">Contact </h2>
-        </header>
-
-        <section class="mapbox" data-mapbox>
-          <figure>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d195600.626516454!2d-75.28283550611768!3d40.00264429454376!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c6b7d8d4b54beb%3A0x89f514d88c3e58c1!2sPhiladelphia%2C%20PA!5e0!3m2!1sen!2sus!4v1695099812208!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-          </figure>
-        </section>
-
-        <section class="contact-form">
-
-          <h3 class="h3 form-title">Contact Form</h3>
-
-          <form action="#" class="form" data-form>
-
-            <div class="input-wrapper">
-              <input type="text" name="fullname" class="form-input" placeholder="Full name" required data-form-input>
-
-              <input type="email" name="email" class="form-input" placeholder="Email address" required data-form-input>
-            </div>
-
-            <textarea name="message" class="form-input" placeholder="Your Message" required data-form-input></textarea>
-
-            <button class="form-btn" type="submit" disabled data-form-btn>
-              <ion-icon name="paper-plane"></ion-icon>
-              <span>Send Message</span>
-            </button>
-
-          </form>
-
-        </section>
-
-      </article>
-
-    </div>
-
-  </main>
-
-
-  <script src="./assets/js/script.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // smooth-scroll for in-page anchors
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', e=>{
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if(el){
+        e.preventDefault();
+        const y = el.getBoundingClientRect().top + window.scrollY - 12;
+        window.scrollTo({top:y, behavior:'smooth'});
+      }
+    });
+  });
+</script>
 </body>
-
 </html>
