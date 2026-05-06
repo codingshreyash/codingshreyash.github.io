@@ -3,14 +3,14 @@
 Personal portfolio website showcasing my experience in software engineering.
 
 ## Live Site
-🌐 [shreyash-ranjan.com](https://shreyash-ranjan.com)  
-🔗 [codingshreyash.github.io](https://codingshreyash.github.io)
+[shreyash-ranjan.com](https://shreyash-ranjan.com)  
+[codingshreyash.github.io](https://codingshreyash.github.io)
 
 ## Features
-- ⚡ Typewriter animation for name
-- 🌙 Dark mode toggle (cool charcoal technical theme)
-- 📱 Fully responsive design  
-- 🎨 Clean, minimalist layout with notebook aesthetic
+- Typewriter animation for name
+- Dark mode toggle (cool charcoal technical theme)
+- Fully responsive design
+- Clean, minimalist layout with notebook aesthetic
 
 ## Tech Stack
 - HTML5
