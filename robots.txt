@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shreyash-ranjan.com/sitemap.xml
+Sitemap: https://shreyashranjan.com/sitemap.xml
