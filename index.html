@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  })();
+</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Shreyash Ranjan - Software Engineer | Portfolio & Resume</title>
@@ -39,6 +46,12 @@
     --hair:#cfcabf;
     --accent:#111111;
     --mono:'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --co-nvidia:#2e6900;
+    --co-coinbase:#0052ff;
+    --co-palantir:#4a5568;
+    --co-vanguard:#96151d;
+    --co-lockheed:#002f6c;
+    --co-pitt:#003594;
   }
 
   /* dark mode / cool charcoal technical theme */
@@ -51,6 +64,12 @@
     --rule:rgba(255,255,255,0.12);
     --hair:rgba(255,255,255,0.08);
     --accent:#4f8ef7;
+    --co-nvidia:#76b900;
+    --co-coinbase:#387eff;
+    --co-palantir:#cbd5e0;
+    --co-vanguard:#db5c73;
+    --co-lockheed:#4299e1;
+    --co-pitt:#ffb81c;
   }
 
   /* dark mode specific overrides */
@@ -92,8 +111,7 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:14px;line-height:1.55}
-  html{overflow-x:hidden}
-  body{min-width:0;overflow-x:hidden}
+  body{min-width:0}
   body{
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
@@ -211,15 +229,15 @@
   section:last-of-type{border-bottom:none}
   .h2{
     display:flex;align-items:baseline;gap:14px;
-    font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 28px;font-weight:500;
+    font-size:14px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--ink);margin:0 0 28px;font-weight:700;
   }
   .h2::before{content:"§";color:var(--accent);font-weight:700}
   .h2 .num{color:var(--accent);font-weight:700}
   .h2 .rule{flex:1;height:1px;background:var(--hair)}
 
   /* about */
-  .about p{font-size:15px;line-height:1.7;color:var(--ink);max-width:62ch;margin:0 0 14px;text-wrap:pretty}
+  .about p{font-size:15px;line-height:1.8;color:var(--ink);max-width:62ch;margin:0 0 22px;text-wrap:pretty}
   .about p:last-child{margin-bottom:0}
   .about .accent{background:var(--accent);color:var(--bg);padding:1px 5px}
   .about .link{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink)}
@@ -241,6 +259,7 @@
   .row .what{font-size:14px;min-width:0}
   .row .what .co{font-weight:700}
   .row .what .title{color:var(--ink-2);display:block;margin-top:2px;font-size:13px}
+  .row .what .title .job-title{font-weight:700;color:var(--ink)}
   .row .what .note{color:var(--muted);font-size:12px;margin-top:4px;display:block}
   .row .where{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;padding-right:8px}
   @media (max-width: 640px){
@@ -248,7 +267,6 @@
     .row .where{text-align:left}
     .contact-grid .val{word-break:break-word}
     .gh-card .gh-handle{font-size:14px}
-    .wrap{overflow-x:hidden}
   }
 
   /* clean experience layout without timeline */
@@ -424,6 +442,29 @@
     font-size:11px;border:1px solid var(--hair);padding:1px 5px;border-radius:2px;
     color:var(--ink-2);background:var(--bg);
   }
+
+  /* Company-specific brand colors */
+  .co-nvidia { color: var(--co-nvidia); font-weight: 500; text-decoration: none; }
+  .co-coinbase { color: var(--co-coinbase); font-weight: 500; text-decoration: none; }
+  .co-palantir { color: var(--co-palantir); font-weight: 500; text-decoration: none; }
+  .co-vanguard { color: var(--co-vanguard); font-weight: 500; text-decoration: none; }
+  .co-lockheed { color: var(--co-lockheed); font-weight: 500; text-decoration: none; }
+  .co-pitt { color: var(--co-pitt); font-weight: 500; text-decoration: none; }
+
+  /* Hover effect for brand links */
+  a.co-nvidia, a.co-coinbase, a.co-palantir, a.co-vanguard, a.co-lockheed, a.co-pitt {
+    transition: opacity 0.15s ease;
+  }
+  a.co-nvidia:hover, a.co-coinbase:hover, a.co-palantir:hover, a.co-vanguard:hover, a.co-lockheed:hover, a.co-pitt:hover {
+    opacity: 0.75;
+  }
+
+  /* Override in experience section */
+  .row .what .co.co-nvidia { color: var(--co-nvidia); }
+  .row .what .co.co-coinbase { color: var(--co-coinbase); }
+  .row .what .co.co-palantir { color: var(--co-palantir); }
+  .row .what .co.co-vanguard { color: var(--co-vanguard); }
+  .row .what .co.co-lockheed { color: var(--co-lockheed); }
 </style>
 
 <!-- Structured Data for SEO -->
@@ -481,9 +522,9 @@
       <div>
         <h1><span id="typewriter-text"></span><span class="cursor"></span></h1>
         <p class="role">
-          SWE Intern @ NVIDIA<br />
+          SWE Intern @ <a href="https://www.nvidia.com" target="_blank" rel="noopener" class="co-nvidia">NVIDIA</a><br />
           CS @ Pitt | Dec 2026<br />
-          Previously Coinbase, Palantir, Vanguard, Lockheed Martin
+          Previously: <a href="https://www.coinbase.com" target="_blank" rel="noopener" class="co-coinbase">Coinbase</a>, <a href="https://www.palantir.com" target="_blank" rel="noopener" class="co-palantir">Palantir</a>, <a href="https://www.vanguard.com" target="_blank" rel="noopener" class="co-vanguard">Vanguard</a>, <a href="https://www.lockheedmartin.com" target="_blank" rel="noopener" class="co-lockheed">Lockheed Martin</a>
         </p>
         <div class="meta">
           <span>Pittsburgh, PA</span>
@@ -521,10 +562,10 @@
       <div class="xp">
 
         <div class="row divider">
-          <div class="when">May — Aug 2026</div>
+          <div class="when">May 2026 — Aug 2026</div>
           <div class="what">
-            <span class="co">NVIDIA</span>
-            <span class="title">Software Engineer Intern · Security Research</span>
+            <a href="https://www.nvidia.com" target="_blank" rel="noopener" class="co co-nvidia">NVIDIA</a>
+            <span class="title"><span class="job-title">Software Engineer Intern</span> · Applied Research</span>
           </div>
           <div class="where">Santa Clara, CA</div>
         </div>
@@ -532,8 +573,8 @@
         <div class="row">
           <div class="when">May 2025 — May 2026</div>
           <div class="what">
-            <span class="co">Coinbase</span>
-            <span class="title">Software Engineer Intern · Security / IAM</span>
+            <a href="https://www.coinbase.com" target="_blank" rel="noopener" class="co co-coinbase">Coinbase</a>
+            <span class="title"><span class="job-title">Software Engineer Intern</span> · Infra / IAM</span>
           </div>
           <div class="where">New York, NY</div>
         </div>
@@ -541,17 +582,17 @@
         <div class="row">
           <div class="when">Nov 2024 — Jan 2025</div>
           <div class="what">
-            <span class="co">Palantir</span>
-            <span class="title">Fellowship · AIP</span>
+            <a href="https://www.palantir.com" target="_blank" rel="noopener" class="co co-palantir">Palantir</a>
+            <span class="title"><span class="job-title">Fellowship</span> · AI Platform (AIP)</span>
           </div>
           <div class="where">Remote</div>
         </div>
 
         <div class="row">
-          <div class="when">May — Aug 2024</div>
+          <div class="when">May 2024 — Aug 2024</div>
           <div class="what">
-            <span class="co">Vanguard</span>
-            <span class="title">Software Engineer Intern · Fraud</span>
+            <a href="https://www.vanguard.com" target="_blank" rel="noopener" class="co co-vanguard">Vanguard</a>
+            <span class="title"><span class="job-title">Software Engineer Intern</span> · Fraud Engineering</span>
           </div>
           <div class="where">Malvern, PA</div>
         </div>
@@ -559,8 +600,8 @@
         <div class="row">
           <div class="when">Jun 2021 — Aug 2023</div>
           <div class="what">
-            <span class="co">Lockheed Martin</span>
-            <span class="title">Software Engineer Intern · Cyber / Cloud</span>
+            <a href="https://www.lockheedmartin.com" target="_blank" rel="noopener" class="co co-lockheed">Lockheed Martin</a>
+            <span class="title"><span class="job-title">Software Engineer Intern</span> · Cyber / Cloud</span>
           </div>
           <div class="where">King of Prussia, PA</div>
         </div>
@@ -568,7 +609,7 @@
       </div>
 
       <div style="margin-top:20px;font-size:12px;color:var(--muted)">
-        <span style="color:var(--ink)">↳</span> University of Pittsburgh, B.S. Computer Science · December 2026
+        <span style="color:var(--ink)">↳</span> <a href="https://www.pitt.edu" target="_blank" rel="noopener" class="co-pitt">University of Pittsburgh</a>, <strong style="color:var(--ink)">BS: Computer Science</strong> · December 2026
       </div>
     </section>
 
@@ -684,10 +725,9 @@
   // dark mode toggle
   function initTheme() {
     const toggle = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
 
-    // Set initial theme
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    // Set initial theme toggle state
     updateToggleText(savedTheme);
 
     // Toggle functionality
