@@ -497,14 +497,16 @@
     </div>
 
     <div class="items-toolbar" style="margin-top:16px">
-      <button class="btn" type="button" id="copy-all">copy all as text</button>
+      <button class="btn" type="button" id="copy-by-person">copy by person</button>
+      <button class="btn ghost" type="button" id="copy-all">copy totals</button>
       <button class="btn ghost" type="button" id="expand-all">show every line</button>
       <span class="spacer"></span>
       <button class="btn ghost" type="button" id="back-edit">← edit</button>
     </div>
     <p class="note" style="margin-top:10px">
-      Screenshot this card and send it over. Each person also has their own <b>copy</b> button that
-      grabs just their share, formatted for a text message.
+      Screenshot this card and send it over. <b>copy by person</b> gives everyone with their own
+      lines listed underneath, <b>copy totals</b> gives just the names and amounts, and the
+      <b>&#10697;</b> on any row grabs that one person&rsquo;s share for a text message.
     </p>
   </section>
 
@@ -1111,6 +1113,26 @@
     return out.join('\n');
   }
 
+  // every person, each with their own lines under them
+  function byPersonText (r) {
+    var out = [
+      ((state.place || '').trim() || 'Receipt') + ' \u2014 ' +
+        ((state.when || '').trim() || todayLabel()),
+      'Total ' + money(r.grand) + ' \u00b7 split ' + state.people.length + ' ways',
+      ''
+    ];
+    state.people.slice().sort(function (a, b) {
+      return (r.owed[b.id] || 0) - (r.owed[a.id] || 0);
+    }).forEach(function (p, i) {
+      out.push((p.name || 'Person ' + (i + 1)) + ' \u2014 ' + money(r.owed[p.id] || 0));
+      var lines = mergeLines(r.lines[p.id] || []);
+      if (!lines.length) out.push('  (nothing on this receipt)');
+      lines.forEach(function (l) { out.push('  ' + l.label + '  ' + money(l.cents)); });
+      out.push('');
+    });
+    return out.join('\n').replace(/\n+$/, '');
+  }
+
   function copyText (text, btn) {
     var done = function () {
       if (btn) { var o = btn.textContent; btn.textContent = 'copied ✓';
@@ -1634,7 +1656,7 @@
       btn.disabled = !state.people.length;
     } else {
       info.innerHTML = '<b>' + money(r.grand) + '</b> split ' + state.people.length + ' ways';
-      btn.textContent = 'copy all';
+      btn.textContent = 'copy by person';
       btn.disabled = false;
     }
   }
@@ -1799,10 +1821,13 @@
     $('#actionbar-btn').onclick = function () {
       if (state.step === 'people') goTo('items');
       else if (state.step === 'items') goTo('results');
-      else copyText(allText(compute()), null);
+      else copyText(byPersonText(compute()), null);
     };
 
     $('#copy-all').onclick = function () { copyText(allText(compute()), $('#copy-all')); };
+    $('#copy-by-person').onclick = function () {
+      copyText(byPersonText(compute()), $('#copy-by-person'));
+    };
     $('#expand-all').onclick = function () {
       var cards = $$('#shares .share');
       var anyClosed = cards.some(function (c) { return !c.classList.contains('open'); });
