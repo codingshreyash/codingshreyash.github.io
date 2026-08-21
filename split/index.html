@@ -145,9 +145,9 @@
   .recent-chip:hover{border-style:solid;border-color:var(--accent);color:var(--ink)}
 
   /* ---------- capture ---------- */
-  .capture-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media (max-width:560px){ .capture-row{grid-template-columns:1fr} }
-  .drop{border:1px dashed var(--hair);background:var(--bg);padding:26px 18px;text-align:center;
+  .capture-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:620px){ .capture-row{grid-template-columns:1fr} }
+  .drop{border:1px dashed var(--hair);background:var(--bg);padding:20px 14px;text-align:center;
     cursor:pointer;transition:border-color .12s ease,background .12s ease}
   .drop:hover,.drop.over{border-color:var(--accent);background:var(--bg-3)}
   .drop .big{font-size:26px;line-height:1;margin-bottom:10px;display:block}
@@ -348,10 +348,15 @@
       <p class="hint">Scanning happens on your device. Grocery receipts with faint print sometimes
          need a fix or two &mdash; every line stays editable.</p>
       <div class="capture-row">
-        <div class="drop" id="drop-scan" role="button" tabindex="0">
+        <div class="drop" id="drop-camera" role="button" tabindex="0">
           <span class="big">▣</span>
-          <div class="t">Scan a photo</div>
-          <div class="s">camera, file, or drag &amp; drop</div>
+          <div class="t">Take a photo</div>
+          <div class="s">opens the camera on a phone</div>
+        </div>
+        <div class="drop" id="drop-upload" role="button" tabindex="0">
+          <span class="big">↥</span>
+          <div class="t">Upload an image</div>
+          <div class="s">photo library, files, drag &amp; drop, or paste</div>
         </div>
         <div class="drop" id="drop-manual" role="button" tabindex="0">
           <span class="big">✎</span>
@@ -359,7 +364,8 @@
           <div class="s">skip the scan, enter items by hand</div>
         </div>
       </div>
-      <input type="file" id="file-input" accept="image/*" capture="environment" class="sr" />
+      <input type="file" id="file-camera" accept="image/*" capture="environment" class="sr" />
+      <input type="file" id="file-upload" accept="image/*" class="sr" />
 
       <div class="progress" id="progress" hidden>
         <div class="msg" id="progress-msg">starting…</div>
@@ -538,7 +544,7 @@
     people: [],
     items: [],
     tax: '', fees: '', tip: '', tipMode: 'pct',
-    expectedTotal: null,
+    expectedTotal: null, expectedSubtotal: null,
     place: '', when: '',
     image: null
   };
@@ -909,18 +915,26 @@
   // the receipt prints its own total — compare against it before trusting the scan
   function renderRecon (r) {
     var rc = $('#recon');
-    if (state.expectedTotal == null || !state.items.length) { rc.hidden = true; return; }
-    var printed = cents(state.expectedTotal);
-    var mine = r.subtotal + r.taxC + r.feeC;          // tip is added after the fact, so leave it out
+    var printed, mine, label;
+    // prefer the printed subtotal: it checks the line items alone, without
+    // depending on whether tax got typed in yet
+    if (state.expectedSubtotal != null) {
+      printed = cents(state.expectedSubtotal); mine = r.subtotal; label = 'subtotal';
+    } else if (state.expectedTotal != null) {
+      printed = cents(state.expectedTotal); mine = r.subtotal + r.taxC + r.feeC; label = 'total';
+    } else { rc.hidden = true; return; }
+    if (!state.items.length) { rc.hidden = true; return; }
+
     var diff = mine - printed;
     rc.hidden = false;
     if (diff === 0) {
       rc.className = 'recon ok';
       rc.innerHTML = '\u2713 these lines add up to the <b>' + money(printed) +
-        '</b> printed on the receipt.';
+        '</b> ' + label + ' printed on the receipt.';
     } else {
       rc.className = 'recon off';
-      rc.innerHTML = '\u26A0 the receipt says <b>' + money(printed) + '</b> but these lines come to <b>' +
+      rc.innerHTML = '\u26A0 the receipt\u2019s ' + label + ' is <b>' + money(printed) +
+        '</b> but these lines come to <b>' +
         money(mine) + '</b> \u2014 off by ' + money(Math.abs(diff)) + '. ' +
         (diff < 0 ? 'A line was probably missed or read low.' : 'A line was probably duplicated or read high.') +
         ' Fix it above, or ignore this if you meant to leave something out.';
@@ -1085,16 +1099,26 @@
      ============================================================ */
   var MONEY_END = /(-?\$?\s*(?:\d{1,3}(?:,\d{3})+|\d{1,5})[.,]\d{2}\s*-?)\s*(?:[A-Z]{1,2})?\s*$/;
 
+  // word-bounded noise: lines that carry money but are not things anyone bought
   var NOISE = new RegExp('\\b(' + [
-    'change\\s*due', 'cash\\s*(back|tend)', 'visa', 'mastercard', 'master\\s*card', 'amex',
-    'american\\s*express', 'discover', 'debit', 'credit\\s*card', 'card\\s*#', 'acct', 'account',
-    'tender', 'payment', 'auth', 'approv', 'ref\\s*#', 'trace', 'terminal', 'chip\\s*read',
-    'xxxx', 'x{4,}', 'balance', 'amount\\s*due', 'total\\s*savings', 'you\\s*saved',
-    'savings\\s*total', 'member\\s*sav', 'loyalty', 'rewards?\\s*(earned|points|balance)',
-    'points', 'items?\\s*sold', 'cashier', 'reg\\s*#', 'store\\s*#', 'invoice', 'order\\s*#',
-    'check\\s*#', 'table\\s*#', 'server', 'guest', 'survey', 'thank', 'http', 'www\\.',
+    'cash\\s*(back|tend)', 'visa', 'mastercard', 'master\\s*card', 'amex',
+    'american\\s*express', 'discover', 'debit', 'credit\\s*card', 'acct', 'account',
+    'tender(ed)?', 'payment', 'approved', 'approval', 'trace', 'terminal', 'chip\\s*read',
+    'x{4,}\\d*', 'balance', 'change\\s*due', 'amount\\s*due',
+    'total\\s*savings', 'you\\s*saved', 'savings\\s*total',
+    'member\\s*savings', 'instant\\s*savings', 'member\\s*\\d+',
+    'loyalty', 'rewards?\\s*(earned|points|balance)', 'points',
+    'items?\\s*sold', 'number\\s*of\\s*items', 'cashier', 'invoice',
+    'server', 'guest', 'survey', 'thank', 'http', 'www',
     'round(ing)?\\s*(up|adj)', 'net\\s*sales', 'gross\\s*sales'
   ].join('|') + ')\\b', 'i');
+
+  // payment words that are noise only when they ARE the line: "CHANGE" is a
+  // total, "LEATHER CHANGE PURSE" is something you bought
+  var PAY_LABEL = /^(change|cash|cash\s*back|debit|credit|visa|balance|tender|total\s*tender|subtotal|total)$/i;
+
+  // label-style noise ending in ':' or '#', where a trailing word boundary can never match
+  var NOISE_LABEL = /\b(amount|aid|seq|app|auth|ref|acct|account|card|reg|store|order|check|table|op|trans|invoice|term)\s*[:#]/i;
 
   function parseMoney (raw, line) {
     var neg = /-/.test(raw) || /\b(coupon|discount|savings|refund|credit|void|promo|markdown)\b/i.test(line);
@@ -1116,17 +1140,18 @@
 
   function cleanName (s) {
     return pretty(String(s)
-      .replace(/^\s*\d{5,}\s*/, '')                   // leading UPC / PLU
+      .replace(/^\s*[A-Z]\s+(?=[\d(])/, '')            // Costco-style tax-flag column: "E  251680 ..."
+      .replace(/^\s*\d{4,}\s*/, '')                    // item number / UPC / PLU
       .replace(/[|_~^{}\[\]]+/g, ' ')
       .replace(/\s*\.{2,}\s*/g, ' ')
-      .replace(/^[\s\-–—:*#.]+/, '')
+      .replace(/^[\s\-–—:*#.\/]+/, '')
       .replace(/[\s\-–—:*#.]+$/, ''));
   }
 
   function parseReceipt (text) {
     var raw = String(text || '').split(/\r?\n/);
     var out = { items: [], tax: null, tip: null, total: null, subtotal: null, place: '' };
-    var header = [];
+    var header = [], taxSeen = [], totalTax = null;
 
     raw.forEach(function (line, li) {
       var t = line.replace(/\s+/g, ' ').trim();
@@ -1149,28 +1174,41 @@
       if (amt === null) return;
 
       if (/sub\s*-?\s*total/.test(lower))                       { out.subtotal = amt; return; }
+      // "A 7.0 % TAX RATE  1.75" restates the tax — it is not another charge
+      if (/\btax\s*rate\b/.test(lower))                        { return; }
+      if (/\btotal\s*tax\b/.test(lower))                        { totalTax = amt; return; }
       if (/\b(sales\s*)?tax\b/.test(lower) && !/taxable/.test(lower)) {
-        out.tax = (out.tax || 0) + amt; return;
+        taxSeen.push(amt); return;
       }
       if (/\b(tip|gratuity)\b/.test(lower))                     { out.tip = amt; return; }
       if (/\b(grand\s*)?total\b|\bamount\s+due\b|\bbalance\s+due\b/.test(lower)) {
         if (out.total === null) out.total = amt; return;
       }
-      if (NOISE.test(lower)) return;
+      if (NOISE.test(lower) || NOISE_LABEL.test(lower)) return;
 
       var name = cleanName(t.slice(0, m.index));
+      if (PAY_LABEL.test(name)) return;
+      var worded = /[A-Za-z]{2}/.test(name);
 
-      // a bare "-1.00" under an item is that item's coupon
-      if ((!name || name.length < 2) && amt < 0 && out.items.length) {
-        out.items.push({ name: 'discount — ' + out.items[out.items.length - 1].name, price: amt });
+      // a nameless negative — "2.20-" against an item code — is the line above's discount
+      if (!worded && amt < 0 && out.items.length) {
+        out.items.push({ name: 'discount \u2014 ' + out.items[out.items.length - 1].name, price: amt });
         return;
       }
-      if (!name || name.length < 2) return;
-      if (!/[A-Za-z]{2}/.test(name)) return;              // pure digits/symbols = not an item
+      if (!name || name.length < 2 || !worded) return;     // pure digits/symbols = not an item
       if (/^\d{1,2}[\/\-]\d{1,2}([\/\-]\d{2,4})?$/.test(name)) return;   // a date
 
       out.items.push({ name: name, price: amt });
     });
+
+    // a receipt often prints TAX and TOTAL TAX with the same figure — count it once
+    if (totalTax !== null) {
+      out.tax = totalTax;
+    } else if (taxSeen.length) {
+      var uniq = [];
+      taxSeen.forEach(function (v) { if (uniq.indexOf(v) === -1) uniq.push(v); });
+      out.tax = uniq.reduce(function (a, b) { return a + b; }, 0);
+    }
 
     // merchant guess: the first real line of text — store names sit above the address
     var best = '';
@@ -1435,6 +1473,7 @@
     if (p.fees != null && p.fees !== 0) state.fees = Math.abs(p.fees).toFixed(2);
     if (p.tip != null && p.tip !== 0) { state.tip = Math.abs(p.tip).toFixed(2); state.tipMode = 'amt'; }
     state.expectedTotal = (p.total != null && p.total !== 0) ? p.total : null;
+    state.expectedSubtotal = (p.subtotal != null && p.subtotal !== 0) ? p.subtotal : null;
     if (p.place && !state.place) state.place = p.place;
     if (!state.when) state.when = todayLabel();
     save();
@@ -1536,30 +1575,33 @@
   function wire () {
     $('#add-person').onclick = function () { addPerson(''); };
 
-    $('#drop-scan').onclick = function () { $('#file-input').click(); };
-    $('#drop-scan').onkeydown = function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file-input').click(); }
-    };
+    [['#drop-camera', '#file-camera'], ['#drop-upload', '#file-upload']].forEach(function (pair) {
+      var tile = $(pair[0]), input = $(pair[1]);
+      tile.onclick = function () { input.click(); };
+      tile.onkeydown = function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
+      };
+      input.onchange = function () {
+        if (this.files && this.files[0]) handleFile(this.files[0]);
+        this.value = '';
+      };
+    });
     $('#drop-manual').onclick = function () { goTo('items'); };
     $('#drop-manual').onkeydown = function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo('items'); }
     };
-    $('#file-input').onchange = function () {
-      if (this.files && this.files[0]) handleFile(this.files[0]);
-      this.value = '';
-    };
 
     ['dragenter', 'dragover'].forEach(function (ev) {
-      $('#drop-scan').addEventListener(ev, function (e) {
+      $('#drop-upload').addEventListener(ev, function (e) {
         e.preventDefault(); this.classList.add('over');
       });
     });
     ['dragleave', 'drop'].forEach(function (ev) {
-      $('#drop-scan').addEventListener(ev, function (e) {
+      $('#drop-upload').addEventListener(ev, function (e) {
         e.preventDefault(); this.classList.remove('over');
       });
     });
-    $('#drop-scan').addEventListener('drop', function (e) {
+    $('#drop-upload').addEventListener('drop', function (e) {
       if (e.dataTransfer && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
     document.addEventListener('dragover', function (e) { e.preventDefault(); });
