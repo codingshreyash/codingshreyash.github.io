@@ -393,6 +393,7 @@
             <div>
               <label class="field" for="engine">engine</label>
               <select id="engine">
+                <option value="shared" id="opt-shared">Gemini vision — free, shared</option>
                 <option value="tesseract">Built-in OCR — free, offline</option>
                 <option value="anthropic">Claude vision — needs API key</option>
                 <option value="gemini">Gemini vision — needs API key</option>
@@ -520,6 +521,28 @@
 <script>
 (function () {
   'use strict';
+
+  /* ==================================================================
+     SHARED GEMINI KEY  —  PASTE YOUR KEY BETWEEN THE QUOTES BELOW
+     ------------------------------------------------------------------
+     Leave it as '' and the page behaves as before: free built-in OCR,
+     and visitors may add their own key.
+
+     Fill it in and every visitor gets vision-model scanning on your
+     Google quota, capped at SHARED_DAILY_LIMIT scans per browser per day.
+
+     READ THIS FIRST — this file is public, so the key is public:
+       1. In Google AI Studio, restrict the key to HTTP referrers
+          shreyashranjan.com/* and *.shreyashranjan.com/*
+       2. In Google Cloud Console set a daily cap on the Generative
+          Language API. The limit below is client-side and can be
+          bypassed by clearing storage; the Google-side cap is the only
+          thing that actually bounds your spend.
+       3. GitHub secret scanning may detect and revoke a key pushed to a
+          public repo. If that happens, rotate it.
+     ================================================================== */
+  var SHARED_GEMINI_KEY = '';
+  var SHARED_DAILY_LIMIT = 10;
 
   /* ============================================================
      constants + tiny helpers
@@ -1344,6 +1367,7 @@
     gemini: 'gemini-3.6-flash'
   };
   function getModel (engine) {
+    if (engine === 'shared') return MODEL_DEFAULTS.gemini;
     var v = '';
     try { v = (localStorage.getItem('split.v1.model.' + engine) || '').trim(); } catch (e) {}
     return v || MODEL_DEFAULTS[engine] || '';
@@ -1352,7 +1376,24 @@
     try { localStorage.setItem('split.v1.model.' + engine, v); } catch (e) {}
   }
 
+  function sharedOn () { return !!SHARED_GEMINI_KEY; }
+
+  function quotaToday () {
+    var today = new Date().toISOString().slice(0, 10), q = { date: today, used: 0 };
+    try {
+      var raw = JSON.parse(localStorage.getItem('split.v1.quota') || 'null');
+      if (raw && raw.date === today) q = raw;
+    } catch (e) {}
+    return q;
+  }
+  function quotaLeft () { return Math.max(0, SHARED_DAILY_LIMIT - quotaToday().used); }
+  function quotaSpend () {
+    var q = quotaToday(); q.used += 1;
+    try { localStorage.setItem('split.v1.quota', JSON.stringify(q)); } catch (e) {}
+  }
+
   function getKey (engine) {
+    if (engine === 'shared') return SHARED_GEMINI_KEY;
     try { return localStorage.getItem('split.v1.key.' + engine) || ''; } catch (e) { return ''; }
   }
   function setKey (engine, v) {
@@ -1365,9 +1406,11 @@
     var m = String(dataUrl).match(/^data:(image\/[a-zA-Z+]+);base64,([\s\S]*)$/);
     if (!m) return Promise.reject(new Error('could not encode the image'));
     onStep(0.35, 'sending to the vision model…');
+    if (engine === 'shared') quotaSpend();
 
     var url, opts, model = getModel(engine);
-    if (engine === 'gemini') {
+    var provider = (engine === 'shared') ? 'gemini' : engine;
+    if (provider === 'gemini') {
       url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
             encodeURIComponent(model) + ':generateContent';
       opts = {
@@ -1381,7 +1424,7 @@
           generationConfig: { temperature: 0, responseMimeType: 'application/json' }
         })
       };
-    } else if (engine === 'anthropic') {
+    } else if (provider === 'anthropic') {
       url = 'https://api.anthropic.com/v1/messages';
       opts = {
         method: 'POST',
@@ -1423,13 +1466,13 @@
         }
         var j = JSON.parse(body);
         onStep(0.9, 'tidying up the lines…');
-        if (engine === 'gemini') {
+        if (provider === 'gemini') {
           var cand = (j.candidates || [])[0];
           if (!cand) throw new Error('the model returned nothing — it may have blocked the image');
           return ((cand.content && cand.content.parts) || [])
             .map(function (part) { return part.text || ''; }).join('');
         }
-        return engine === 'anthropic'
+        return provider === 'anthropic'
           ? (j.content || []).map(function (c) { return c.text || ''; }).join('')
           : ((j.choices && j.choices[0] && j.choices[0].message.content) || '');
       });
@@ -1480,6 +1523,10 @@
     scanning = true;
 
     var engine = $('#engine').value;
+    if (engine === 'shared' && (!sharedOn() || quotaLeft() <= 0)) {
+      engine = 'tesseract';
+      toast(sharedOn() ? 'daily shared scans used up — using free OCR' : 'using free OCR');
+    }
     $('#scan-error').classList.remove('show');
     setProgress(0.05, 'opening the photo…');
 
@@ -1607,6 +1654,9 @@
   }
 
   var ENGINE_NOTES = {
+    shared: 'Runs on the site owner\u2019s Google key, so there is nothing for you to set up. ' +
+            'Capped per browser per day \u2014 once it runs out, scanning falls back to the free ' +
+            'built-in OCR. Add your own key below to lift the cap.',
     anthropic: 'Get a key at <b>console.anthropic.com</b>. Paid, roughly a third of a cent per receipt.',
     openai: 'Get a key at <b>platform.openai.com</b>. Paid, roughly a cent per receipt.',
     gemini: 'Get a key at <b>aistudio.google.com</b>. Google offers a free tier with rate limits, ' +
@@ -1615,7 +1665,7 @@
 
   function syncEngine () {
     var eng = $('#engine').value;
-    var needsKey = eng !== 'tesseract';
+    var needsKey = eng !== 'tesseract' && eng !== 'shared';
     $('#key-wrap').hidden = !needsKey;
     $('#model-wrap').hidden = !needsKey;
     $('#key-note').hidden = !needsKey;
@@ -1633,9 +1683,16 @@
 
     var line = $('#engine-line'), label = {
       tesseract: 'the free built-in OCR', anthropic: 'Claude vision',
-      openai: 'OpenAI vision', gemini: 'Gemini vision'
+      openai: 'OpenAI vision', gemini: 'Gemini vision', shared: 'Gemini vision'
     }[eng];
-    if (needsKey && !getKey(eng)) {
+    if (eng === 'shared') {
+      var left = quotaLeft();
+      line.innerHTML = left > 0
+        ? 'Reading with <b>Gemini vision</b> \u2014 <b>' + left + '</b> of ' + SHARED_DAILY_LIMIT +
+          ' free scans left today. <button type="button" id="open-settings">change</button>'
+        : 'Free Gemini scans are used up for today \u2014 falling back to the <b>built-in OCR</b>. ' +
+          '<button type="button" id="open-settings">use your own key</button>';
+    } else if (needsKey && !getKey(eng)) {
       line.innerHTML = 'Set to <b>' + label + '</b>, but no key is saved yet \u2014 ' +
         '<button type="button" id="open-settings">add one below</button> or it will fail.';
       $('#adv-settings').open = true;
@@ -1793,7 +1850,17 @@
     if (!state.people.length) { state.people.push(newPerson('Me')); state.people.push(newPerson('')); }
     state.people.forEach(function (p, i) { if (!p.color) p.color = PALETTE[i % PALETTE.length]; });
 
-    try { $('#engine').value = localStorage.getItem(LS.engine) || 'tesseract'; } catch (e) {}
+    // no shared key baked in -> the option should not exist at all
+    if (!sharedOn()) {
+      var so = $('#opt-shared');
+      if (so) so.parentNode.removeChild(so);
+    }
+    var saved = '';
+    try { saved = localStorage.getItem(LS.engine) || ''; } catch (e) {}
+    if (saved === 'shared' && !sharedOn()) saved = '';
+    if (!saved) saved = sharedOn() ? 'shared' : 'tesseract';
+    $('#engine').value = saved;
+    if (!$('#engine').value) $('#engine').value = 'tesseract';
     syncEngine();
     wire();
     renderPeople();
