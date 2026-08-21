@@ -7,7 +7,7 @@
     document.documentElement.setAttribute('data-theme', t);
   })();
 </script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://api.anthropic.com https://api.openai.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com;">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Split — Receipt Splitter | Shreyash Ranjan</title>
@@ -367,6 +367,8 @@
       <input type="file" id="file-camera" accept="image/*" capture="environment" class="sr" />
       <input type="file" id="file-upload" accept="image/*" class="sr" />
 
+      <div class="banner" id="scan-error" style="margin-top:12px"></div>
+
       <div class="progress" id="progress" hidden>
         <div class="msg" id="progress-msg">starting…</div>
         <div class="bar"><i id="progress-bar"></i></div>
@@ -387,13 +389,18 @@
               <select id="engine">
                 <option value="tesseract">Built-in OCR — free, offline</option>
                 <option value="anthropic">Claude vision — needs API key</option>
+                <option value="gemini">Gemini vision — needs API key</option>
                 <option value="openai">OpenAI vision — needs API key</option>
               </select>
             </div>
             <div id="key-wrap" hidden>
               <label class="field" for="apikey">api key</label>
-              <input type="password" id="apikey" placeholder="sk-… / sk-ant-…" autocomplete="off" spellcheck="false" />
+              <input type="password" id="apikey" placeholder="paste your key" autocomplete="off" spellcheck="false" />
             </div>
+          </div>
+          <div id="model-wrap" hidden style="margin-top:10px">
+            <label class="field" for="model">model <span style="text-transform:none;letter-spacing:0">— leave blank for the default</span></label>
+            <input type="text" id="model" autocomplete="off" spellcheck="false" />
           </div>
           <p class="note" id="key-note" style="margin:10px 0 0" hidden></p>
         </div>
@@ -1325,6 +1332,20 @@
     'Do NOT include subtotal, total, tax, tip, change or payment lines in "items". ' +
     'Use 0 for any of tax/fees/tip/total you cannot find.';
 
+  var MODEL_DEFAULTS = {
+    anthropic: 'claude-sonnet-5',
+    openai: 'gpt-4o',
+    gemini: 'gemini-2.5-flash'
+  };
+  function getModel (engine) {
+    var v = '';
+    try { v = (localStorage.getItem('split.v1.model.' + engine) || '').trim(); } catch (e) {}
+    return v || MODEL_DEFAULTS[engine] || '';
+  }
+  function setModel (engine, v) {
+    try { localStorage.setItem('split.v1.model.' + engine, v); } catch (e) {}
+  }
+
   function getKey (engine) {
     try { return localStorage.getItem('split.v1.key.' + engine) || ''; } catch (e) { return ''; }
   }
@@ -1339,8 +1360,22 @@
     if (!m) return Promise.reject(new Error('could not encode the image'));
     onStep(0.35, 'sending to the vision model…');
 
-    var url, opts;
-    if (engine === 'anthropic') {
+    var url, opts, model = getModel(engine);
+    if (engine === 'gemini') {
+      url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+            encodeURIComponent(model) + ':generateContent';
+      opts = {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: m[1], data: m[2] } },
+            { text: LLM_PROMPT }
+          ] }],
+          generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+        })
+      };
+    } else if (engine === 'anthropic') {
       url = 'https://api.anthropic.com/v1/messages';
       opts = {
         method: 'POST',
@@ -1351,7 +1386,7 @@
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-5', max_tokens: 4096,
+          model: model, max_tokens: 4096,
           messages: [{ role: 'user', content: [
             { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } },
             { type: 'text', text: LLM_PROMPT }
@@ -1364,7 +1399,7 @@
         method: 'POST',
         headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
         body: JSON.stringify({
-          model: 'gpt-4o', max_tokens: 4096,
+          model: model, max_tokens: 4096,
           messages: [{ role: 'user', content: [
             { type: 'text', text: LLM_PROMPT },
             { type: 'image_url', image_url: { url: dataUrl } }
@@ -1382,6 +1417,12 @@
         }
         var j = JSON.parse(body);
         onStep(0.9, 'tidying up the lines…');
+        if (engine === 'gemini') {
+          var cand = (j.candidates || [])[0];
+          if (!cand) throw new Error('the model returned nothing — it may have blocked the image');
+          return ((cand.content && cand.content.parts) || [])
+            .map(function (part) { return part.text || ''; }).join('');
+        }
         return engine === 'anthropic'
           ? (j.content || []).map(function (c) { return c.text || ''; }).join('')
           : ((j.choices && j.choices[0] && j.choices[0].message.content) || '');
@@ -1420,12 +1461,20 @@
   }
   function hideProgress () { $('#progress').hidden = true; $('#progress-bar').style.width = '0'; }
 
+  function showScanError (msg) {
+    var b = $('#scan-error');
+    b.innerHTML = '<b>Scan failed</b> — ' + esc(msg) +
+      '<br>Your photo is still attached, so you can press <b>Type it in</b> and read the lines off it.';
+    b.classList.add('show');
+  }
+
   function handleFile (file) {
     if (scanning) return;
     if (!file || !/^image\//.test(file.type)) { toast('that needs to be an image'); return; }
     scanning = true;
 
     var engine = $('#engine').value;
+    $('#scan-error').classList.remove('show');
     setProgress(0.05, 'opening the photo…');
 
     readFile(file)
@@ -1460,9 +1509,9 @@
         scanning = false;
         hideProgress();
         console.error(err);
-        toast('scan failed — ' + (err && err.message ? err.message : 'try again'));
-        // the photo is still useful to read off of, so go in with it attached
-        if (state.image) { if (!state.items.length) state.items.push(newItem()); save(); renderItems(); goTo('items'); }
+        // stay on this screen: an API key or model error needs reading and fixing here
+        showScanError(err && err.message ? err.message : 'something went wrong — try again');
+        save();
       });
   }
 
@@ -1551,16 +1600,28 @@
     });
   }
 
+  var ENGINE_NOTES = {
+    anthropic: 'Get a key at <b>console.anthropic.com</b>. Paid, roughly a third of a cent per receipt.',
+    openai: 'Get a key at <b>platform.openai.com</b>. Paid, roughly a cent per receipt.',
+    gemini: 'Get a key at <b>aistudio.google.com</b>. Google offers a free tier with rate limits, ' +
+            'so this is usually the free way to get vision-model accuracy — check their current limits.'
+  };
+
   function syncEngine () {
     var eng = $('#engine').value;
     var needsKey = eng !== 'tesseract';
     $('#key-wrap').hidden = !needsKey;
+    $('#model-wrap').hidden = !needsKey;
     $('#key-note').hidden = !needsKey;
     if (needsKey) {
       $('#apikey').value = getKey(eng);
-      $('#key-note').innerHTML = eng === 'anthropic'
-        ? 'Uses <code>claude-sonnet-5</code>. Get a key at <b>console.anthropic.com</b> — roughly a third of a cent per receipt.'
-        : 'Uses <code>gpt-4o</code>. Get a key at <b>platform.openai.com</b> — roughly a cent per receipt.';
+      var stored = '';
+      try { stored = localStorage.getItem('split.v1.model.' + eng) || ''; } catch (e) {}
+      $('#model').value = stored;
+      $('#model').placeholder = MODEL_DEFAULTS[eng] || '';
+      $('#key-note').innerHTML = (ENGINE_NOTES[eng] || '') +
+        ' The key is kept in this browser only and sent straight to the provider. ' +
+        'If the model name is ever retired, put a current one in the model box.';
     }
     try { localStorage.setItem(LS.engine, eng); } catch (e) {}
   }
@@ -1621,6 +1682,7 @@
 
     $('#engine').onchange = syncEngine;
     $('#apikey').oninput = function () { setKey($('#engine').value, this.value.trim()); };
+    $('#model').oninput = function () { setModel($('#engine').value, this.value.trim()); };
 
     $('#add-item').onclick = addItemAndFocus;
     $('#add-item-2').onclick = addItemAndFocus;
