@@ -154,6 +154,10 @@
   .drop .t{font-size:13px;font-weight:700;margin-bottom:4px}
   .drop .s{font-size:11px;color:var(--muted)}
 
+  .engine-line{margin:12px 0 0;font-size:11.5px;color:var(--muted)}
+  .engine-line b{color:var(--ink)}
+  .engine-line button{background:none;border:0;padding:0;font:inherit;color:var(--accent);
+    cursor:pointer;text-decoration:underline;text-underline-offset:2px}
   .progress{margin-top:14px;border:1px solid var(--hair);background:var(--bg);padding:12px}
   .progress .bar{height:6px;background:var(--bg-3);overflow:hidden;margin-top:8px}
   .progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease}
@@ -366,6 +370,8 @@
       </div>
       <input type="file" id="file-camera" accept="image/*" capture="environment" class="sr" />
       <input type="file" id="file-upload" accept="image/*" class="sr" />
+
+      <p class="engine-line" id="engine-line"></p>
 
       <div class="banner" id="scan-error" style="margin-top:12px"></div>
 
@@ -1335,7 +1341,7 @@
   var MODEL_DEFAULTS = {
     anthropic: 'claude-sonnet-5',
     openai: 'gpt-4o',
-    gemini: 'gemini-2.5-flash'
+    gemini: 'gemini-3.6-flash'
   };
   function getModel (engine) {
     var v = '';
@@ -1624,6 +1630,22 @@
         'If the model name is ever retired, put a current one in the model box.';
     }
     try { localStorage.setItem(LS.engine, eng); } catch (e) {}
+
+    var line = $('#engine-line'), label = {
+      tesseract: 'the free built-in OCR', anthropic: 'Claude vision',
+      openai: 'OpenAI vision', gemini: 'Gemini vision'
+    }[eng];
+    if (needsKey && !getKey(eng)) {
+      line.innerHTML = 'Set to <b>' + label + '</b>, but no key is saved yet \u2014 ' +
+        '<button type="button" id="open-settings">add one below</button> or it will fail.';
+      $('#adv-settings').open = true;
+    } else {
+      line.innerHTML = 'Reading with <b>' + label + '</b>. ' +
+        '<button type="button" id="open-settings">change</button>';
+    }
+    $('#open-settings').onclick = function () {
+      var d = $('#adv-settings'); d.open = true; d.scrollIntoView({ block: 'center' });
+    };
   }
 
   function addItemAndFocus () {
