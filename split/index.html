@@ -10,15 +10,15 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com;">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Split — Receipt Splitter | Shreyash Ranjan</title>
-<meta name="description" content="Split a receipt with roommates and friends. Snap a photo, assign items, get an exact per-person breakdown you can screenshot and send.">
+<title>split | Shreyash Ranjan</title>
+<meta name="description" content="Split a receipt with roommates. Take a photo, tap who had what, get exact per-person totals.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://shreyashranjan.com/split/">
 <meta name="theme-color" content="#1a1a1d" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f4f1ec" media="(prefers-color-scheme: light)">
 
-<meta property="og:title" content="Split — Receipt Splitter" />
-<meta property="og:description" content="Snap a receipt, tap who's in on each item, screenshot the result. Free, private, works offline." />
+<meta property="og:title" content="split" />
+<meta property="og:description" content="Split a receipt with roommates. Nothing leaves your browser." />
 <meta property="og:url" content="https://shreyashranjan.com/split/" />
 <meta property="og:type" content="website" />
 
@@ -154,10 +154,6 @@
   .drop .t{font-size:13px;font-weight:700;margin-bottom:4px}
   .drop .s{font-size:11px;color:var(--muted)}
 
-  .engine-line{margin:12px 0 0;font-size:11.5px;color:var(--muted)}
-  .engine-line b{color:var(--ink)}
-  .engine-line button{background:none;border:0;padding:0;font:inherit;color:var(--accent);
-    cursor:pointer;text-decoration:underline;text-underline-offset:2px}
   .progress{margin-top:14px;border:1px solid var(--hair);background:var(--bg);padding:12px}
   .progress .bar{height:6px;background:var(--bg-3);overflow:hidden;margin-top:8px}
   .progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease}
@@ -324,22 +320,20 @@
 
   <section class="hero">
     <h1><span class="slash">/</span>split</h1>
-    <p>Snap a receipt, tap who&rsquo;s in on each item, screenshot the result. Runs entirely in your
-       browser &mdash; no account, no upload, no server.</p>
+    <p>Split a receipt with roommates. Nothing leaves your browser.</p>
   </section>
 
   <nav class="rail" aria-label="Steps">
-    <button type="button" data-goto="people" aria-current="true">1 &middot; who</button>
-    <button type="button" data-goto="items">2 &middot; items</button>
-    <button type="button" data-goto="results">3 &middot; split</button>
+    <button type="button" data-goto="people" aria-current="true">1 who</button>
+    <button type="button" data-goto="items">2 items</button>
+    <button type="button" data-goto="results">3 split</button>
   </nav>
 
   <!-- ================= SCREEN 1: PEOPLE + CAPTURE ================= -->
   <section class="screen active" id="screen-people">
     <div class="panel">
-      <h2>Who&rsquo;s splitting</h2>
-      <p class="hint">Add everyone who might be on the receipt. You can leave people off individual
-         items later &mdash; nobody pays for what they didn&rsquo;t get.</p>
+      <h2>Who's splitting</h2>
+      <p class="hint">Add everyone. You can take people off individual lines later.</p>
       <div class="people-grid" id="people-grid"></div>
       <button class="btn sm" type="button" id="add-person">+ add person</button>
       <div class="recents" id="recents" hidden>
@@ -349,55 +343,47 @@
 
     <div class="panel">
       <h2>The receipt</h2>
-      <p class="hint">Scanning happens on your device. Grocery receipts with faint print sometimes
-         need a fix or two &mdash; every line stays editable.</p>
+      <p class="hint">Every line stays editable after the scan.</p>
       <div class="capture-row">
         <div class="drop" id="drop-camera" role="button" tabindex="0">
           <span class="big">▣</span>
           <div class="t">Take a photo</div>
-          <div class="s">opens the camera on a phone</div>
+          <div class="s">uses your camera</div>
         </div>
         <div class="drop" id="drop-upload" role="button" tabindex="0">
           <span class="big">↥</span>
           <div class="t">Upload an image</div>
-          <div class="s">photo library, files, drag &amp; drop, or paste</div>
+          <div class="s">from your photos or files</div>
         </div>
         <div class="drop" id="drop-manual" role="button" tabindex="0">
           <span class="big">✎</span>
           <div class="t">Type it in</div>
-          <div class="s">skip the scan, enter items by hand</div>
+          <div class="s">enter items by hand</div>
         </div>
       </div>
       <input type="file" id="file-camera" accept="image/*" capture="environment" class="sr" />
       <input type="file" id="file-upload" accept="image/*" class="sr" />
 
-      <p class="engine-line" id="engine-line"></p>
-
+      <div class="banner" id="engine-warn" style="margin-top:12px"></div>
       <div class="banner" id="scan-error" style="margin-top:12px"></div>
 
       <div class="progress" id="progress" hidden>
-        <div class="msg" id="progress-msg">starting…</div>
+        <div class="msg" id="progress-msg">starting</div>
         <div class="bar"><i id="progress-bar"></i></div>
       </div>
 
       <details class="adv" id="adv-settings">
-        <summary>Scanning engine</summary>
+        <summary>options</summary>
         <div class="body">
-          <p class="note" style="margin:0 0 12px">
-            <b>Built-in OCR</b> is free and offline &mdash; good on crisp restaurant receipts, shakier on
-            long faded grocery tape. Add a vision-model key and /split will read the photo with an LLM
-            instead: far better on abbreviations like <code>ORG CHKN THGH</code>. The key is stored only in
-            this browser&rsquo;s <code>localStorage</code> and is sent straight to the provider.
-          </p>
           <div class="row2">
             <div>
               <label class="field" for="engine">engine</label>
               <select id="engine">
-                <option value="shared" id="opt-shared">Gemini vision — free, shared</option>
-                <option value="tesseract">Built-in OCR — free, offline</option>
-                <option value="anthropic">Claude vision — needs API key</option>
-                <option value="gemini">Gemini vision — needs API key</option>
-                <option value="openai">OpenAI vision — needs API key</option>
+                <option value="shared" id="opt-shared">Gemini (free)</option>
+                <option value="tesseract">Built-in OCR (free, offline)</option>
+                <option value="anthropic">Claude (your key)</option>
+                <option value="gemini">Gemini (your key)</option>
+                <option value="openai">OpenAI (your key)</option>
               </select>
             </div>
             <div id="key-wrap" hidden>
@@ -406,7 +392,7 @@
             </div>
           </div>
           <div id="model-wrap" hidden style="margin-top:10px">
-            <label class="field" for="model">model <span style="text-transform:none;letter-spacing:0">— leave blank for the default</span></label>
+            <label class="field" for="model">model (blank for default)</label>
             <input type="text" id="model" autocomplete="off" spellcheck="false" />
           </div>
           <p class="note" id="key-note" style="margin:10px 0 0" hidden></p>
@@ -424,14 +410,13 @@
         <div class="thumb" id="thumb"><img id="thumb-img" alt="Scanned receipt" /></div>
         <div>
           <h2 style="margin-bottom:4px">Check the lines</h2>
-          <p class="hint" style="margin:0">Tap the photo to enlarge it and compare. Fix any name or
-             price that came out wrong.</p>
+          <p class="hint" style="margin:0">Tap the photo to enlarge. Fix anything the scan got wrong.</p>
         </div>
       </div>
       <div id="items-head">
         <h2>The lines</h2>
-        <p class="hint">Tap a name chip to take someone off an item, or use <b>&minus;</b> / <b>+</b>
-           to change how many ways it splits.</p>
+        <p class="hint">Tap a name to take someone off a line. Use <b>&minus;</b> and <b>+</b> to
+           change how many ways it splits.</p>
       </div>
 
       <div class="items-toolbar">
@@ -447,8 +432,7 @@
 
     <div class="panel">
       <h2>Tax, tip &amp; fees</h2>
-      <p class="hint">Split in proportion to what each person&rsquo;s items came to &mdash; so nobody pays
-         tax on a steak they didn&rsquo;t eat.</p>
+      <p class="hint">Split in proportion to each person's items.</p>
       <div class="extras">
         <div>
           <label class="field" for="tax">tax</label>
@@ -493,7 +477,7 @@
       </div>
       <div class="zig"></div>
       <div id="shares"></div>
-      <div class="res-foot">split with shreyashranjan.com/split</div>
+      <div class="res-foot">shreyashranjan.com/split</div>
     </div>
 
     <div class="items-toolbar" style="margin-top:16px">
@@ -504,9 +488,9 @@
       <button class="btn ghost" type="button" id="back-edit">← edit</button>
     </div>
     <p class="note" style="margin-top:10px">
-      Screenshot this card and send it over. <b>copy by person</b> gives everyone with their own
-      lines listed underneath, <b>copy totals</b> gives just the names and amounts, and the
-      <b>&#10697;</b> on any row grabs that one person&rsquo;s share for a text message.
+      Screenshot this card, or copy it as text. <b>copy by person</b> lists everyone with their
+      own lines under them, <b>copy totals</b> is just names and amounts, and <b>&#10697;</b> on a
+      row copies that one person.
     </p>
   </section>
 
@@ -525,15 +509,15 @@
   'use strict';
 
   /* ==================================================================
-     SHARED GEMINI KEY  —  PASTE YOUR KEY BETWEEN THE QUOTES BELOW
+     SHARED GEMINI KEY. PASTE YOUR KEY BETWEEN THE QUOTES BELOW.
      ------------------------------------------------------------------
      Leave it as '' and the page behaves as before: free built-in OCR,
      and visitors may add their own key.
 
-     Fill it in and every visitor gets vision-model scanning on your
-     Google quota, capped at SHARED_DAILY_LIMIT scans per browser per day.
+     Fill it in and every visitor gets model scanning on your Google
+     quota, capped at SHARED_DAILY_LIMIT scans per browser per day.
 
-     READ THIS FIRST — this file is public, so the key is public:
+     READ THIS FIRST. This file is public, so the key is public:
        1. In Google AI Studio, restrict the key to HTTP referrers
           shreyashranjan.com/* and *.shreyashranjan.com/*
        2. In Google Cloud Console set a daily cap on the Generative
@@ -608,7 +592,7 @@
     try {
       localStorage.setItem(LS.state, JSON.stringify(state));
     } catch (e) {
-      // a receipt photo can push us past the ~5MB quota — the numbers matter more than the picture
+      // a receipt photo can push us past the ~5MB quota; the numbers matter more than the picture
       try {
         var img = state.image; state.image = null;
         localStorage.setItem(LS.state, JSON.stringify(state));
@@ -639,7 +623,7 @@
   }
 
   /* ============================================================
-     split math — integer cents, largest-remainder allocation
+     split math: integer cents, largest-remainder allocation
      so the parts always add back up to the whole
      ============================================================ */
   function distribute (total, weights) {
@@ -710,7 +694,7 @@
   }
 
   /* ============================================================
-     screen 1 — people
+     screen 1: people
      ============================================================ */
   function renderPeople () {
     var grid = $('#people-grid');
@@ -785,7 +769,7 @@
   }
 
   /* ============================================================
-     screen 2 — items
+     screen 2: items
      ============================================================ */
   function initials (p, idx) {
     var n = (p.name || '').trim();
@@ -801,7 +785,7 @@
     if (!state.items.length) {
       var empty = el('div', 'note');
       empty.style.padding = '18px 2px';
-      empty.textContent = 'No lines yet — scan a receipt or add them by hand.';
+      empty.textContent = 'No lines yet. Scan a receipt or add them by hand.';
       list.appendChild(empty);
     }
     refreshBanner();
@@ -885,7 +869,7 @@
       var c = el('button', 'chip');
       c.type = 'button';
       c.setAttribute('aria-pressed', on ? 'true' : 'false');
-      c.title = (p.name || 'Person ' + (idx + 1)) + (on ? ' — on this line' : ' — not on this line');
+      c.title = (p.name || 'Person ' + (idx + 1)) + (on ? ' is on this line' : ' is not on this line');
       c.style.color = on ? '#fff' : p.color;
       c.style.background = on ? p.color : 'transparent';
       c.style.borderColor = on ? p.color : '';
@@ -904,14 +888,14 @@
     btns[0].disabled = n === 0;
     btns[1].disabled = n >= state.people.length;
     $('.val', st).innerHTML = n === 0
-      ? '<b>—</b>'
+      ? '<b>none</b>'
       : (n === 1 ? '<b>all</b> of it' : '<b>1/' + n + '</b> each');
 
     var c = cents(it.price);
     var each = $('.each', row);
     if (n === 0) {
       each.className = 'each warnrow';
-      each.textContent = '⚠ nobody is on this line — its ' + money(c) + ' is not being charged to anyone';
+      each.textContent = 'nobody on this line, ' + money(c) + ' unassigned';
       row.classList.add('flagged');
     } else {
       each.className = 'each';
@@ -919,7 +903,7 @@
       var parts = distribute(c, it.assignees.map(function () { return 1; }));
       var lo = Math.min.apply(null, parts), hi = Math.max.apply(null, parts);
       each.textContent = money(c) + ' ÷ ' + n + ' = ' +
-        (lo === hi ? money(hi) + ' each' : money(lo) + '–' + money(hi) + ' each');
+        (lo === hi ? money(hi) + ' each' : money(lo) + ' to ' + money(hi) + ' each');
     }
   }
 
@@ -950,7 +934,7 @@
     }
   }
 
-  // the receipt prints its own total — compare against it before trusting the scan
+  // the receipt prints its own total; compare against it before trusting the scan
   function renderRecon (r) {
     var rc = $('#recon');
     var printed, mine, label;
@@ -967,15 +951,14 @@
     rc.hidden = false;
     if (diff === 0) {
       rc.className = 'recon ok';
-      rc.innerHTML = '\u2713 these lines add up to the <b>' + money(printed) +
-        '</b> ' + label + ' printed on the receipt.';
+      rc.innerHTML = 'Lines add up to the <b>' + money(printed) + '</b> ' + label +
+        ' on the receipt.';
     } else {
       rc.className = 'recon off';
-      rc.innerHTML = '\u26A0 the receipt\u2019s ' + label + ' is <b>' + money(printed) +
-        '</b> but these lines come to <b>' +
-        money(mine) + '</b> \u2014 off by ' + money(Math.abs(diff)) + '. ' +
-        (diff < 0 ? 'A line was probably missed or read low.' : 'A line was probably duplicated or read high.') +
-        ' Fix it above, or ignore this if you meant to leave something out.';
+      rc.innerHTML = 'Receipt ' + label + ' is <b>' + money(printed) +
+        '</b>, these lines come to <b>' + money(mine) + '</b>. Off by ' +
+        money(Math.abs(diff)) + ', so a line is probably ' +
+        (diff < 0 ? 'missing.' : 'duplicated or too high.');
     }
   }
 
@@ -983,8 +966,8 @@
     var r = compute(), b = $('#unassigned-banner');
     if (r.orphanCount > 0) {
       b.innerHTML = '<b>' + r.orphanCount + ' line' + (r.orphanCount > 1 ? 's have' : ' has') +
-        ' nobody on ' + (r.orphanCount > 1 ? 'them' : 'it') + '</b> — ' + money(r.orphanCents) +
-        ' is unaccounted for. Tap a name chip on the flagged lines, or delete them.';
+        ' nobody on ' + (r.orphanCount > 1 ? 'them.' : 'it.') + '</b> ' + money(r.orphanCents) +
+        ' is not going to anyone.';
       b.classList.add('show');
     } else {
       b.classList.remove('show');
@@ -992,7 +975,7 @@
   }
 
   /* ============================================================
-     screen 3 — results
+     screen 3: results
      ============================================================ */
   function renderResults () {
     var r = compute();
@@ -1081,34 +1064,35 @@
 
   function todayLabel () {
     var d = new Date();
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            .replace(',', '');
   }
 
   function personText (p, r) {
-    var head = ((state.place || '').trim() || 'Receipt') + ' — ' +
+    var head = ((state.place || '').trim() || 'Receipt') + ', ' +
                ((state.when || '').trim() || todayLabel());
-    var out = [head, (p.name || 'You') + ': ' + money(r.owed[p.id] || 0), ''];
+    var out = [head, (p.name || 'You') + ' ' + money(r.owed[p.id] || 0), ''];
     mergeLines(r.lines[p.id] || []).forEach(function (l) {
       out.push('  ' + l.label + '  ' + money(l.cents));
     });
-    out.push('', 'total bill ' + money(r.grand) + ' · split ' + state.people.length + ' ways');
+    out.push('', 'total bill ' + money(r.grand) + ', split ' + state.people.length + ' ways');
     return out.join('\n');
   }
 
   function allText (r) {
-    var out = [((state.place || '').trim() || 'Receipt') + ' — ' +
+    var out = [((state.place || '').trim() || 'Receipt') + ', ' +
                ((state.when || '').trim() || todayLabel()),
                'Total ' + money(r.grand), ''];
     state.people.slice().sort(function (a, b) {
       return (r.owed[b.id] || 0) - (r.owed[a.id] || 0);
     }).forEach(function (p, i) {
-      out.push((p.name || 'Person ' + (i + 1)) + ': ' + money(r.owed[p.id] || 0));
+      out.push((p.name || 'Person ' + (i + 1)) + ' ' + money(r.owed[p.id] || 0));
     });
     if (r.taxC || r.feeC || r.tipC) {
-      out.push('', '(includes ' +
+      out.push('', 'includes ' +
         [r.taxC ? money(r.taxC) + ' tax' : '', r.feeC ? money(r.feeC) + ' fees' : '',
          r.tipC ? money(r.tipC) + ' tip' : ''].filter(Boolean).join(' + ') +
-        ', shared in proportion to each person’s items)');
+        ', split in proportion to items');
     }
     return out.join('\n');
   }
@@ -1116,15 +1100,15 @@
   // every person, each with their own lines under them
   function byPersonText (r) {
     var out = [
-      ((state.place || '').trim() || 'Receipt') + ' \u2014 ' +
+      ((state.place || '').trim() || 'Receipt') + ', ' +
         ((state.when || '').trim() || todayLabel()),
-      'Total ' + money(r.grand) + ' \u00b7 split ' + state.people.length + ' ways',
+      'Total ' + money(r.grand) + ', split ' + state.people.length + ' ways',
       ''
     ];
     state.people.slice().sort(function (a, b) {
       return (r.owed[b.id] || 0) - (r.owed[a.id] || 0);
     }).forEach(function (p, i) {
-      out.push((p.name || 'Person ' + (i + 1)) + ' \u2014 ' + money(r.owed[p.id] || 0));
+      out.push((p.name || 'Person ' + (i + 1)) + ' ' + money(r.owed[p.id] || 0));
       var lines = mergeLines(r.lines[p.id] || []);
       if (!lines.length) out.push('  (nothing on this receipt)');
       lines.forEach(function (l) { out.push('  ' + l.label + '  ' + money(l.cents)); });
@@ -1137,7 +1121,7 @@
     var done = function () {
       if (btn) { var o = btn.textContent; btn.textContent = 'copied ✓';
         setTimeout(function () { btn.textContent = o; }, 1400); }
-      toast('copied to clipboard');
+      toast('copied');
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
@@ -1148,7 +1132,7 @@
     ta.value = text;
     ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px';
     document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); done(); } catch (e) { toast('copy failed — select the text manually'); }
+    try { document.execCommand('copy'); done(); } catch (e) { toast('copy failed, select the text manually'); }
     ta.remove();
   }
 
@@ -1190,7 +1174,7 @@
 
   function pretty (s) {
     s = s.replace(/\s+/g, ' ').trim();
-    if (/[a-z]/.test(s)) return s;                    // already mixed case — leave it
+    if (/[a-z]/.test(s)) return s;                    // already mixed case, leave it
     return s.toLowerCase().replace(/(^|[\s\-\/&(])([a-z])/g, function (m, a, b) {
       return a + b.toUpperCase();
     });
@@ -1220,7 +1204,7 @@
       var lower = t.toLowerCase();
 
       if (!m) {
-        // "2 @ 1.99" / "0.86 lb @ $2.99/lb" — belongs to the line above
+        // "2 @ 1.99" / "0.86 lb @ $2.99/lb" belongs to the line above
         if (/@/.test(t) && out.items.length) {
           var prev = out.items[out.items.length - 1];
           if (prev.name.length < 40) prev.name += ' (' + pretty(t) + ')';
@@ -1232,7 +1216,7 @@
       if (amt === null) return;
 
       if (/sub\s*-?\s*total/.test(lower))                       { out.subtotal = amt; return; }
-      // "A 7.0 % TAX RATE  1.75" restates the tax — it is not another charge
+      // "A 7.0 % TAX RATE  1.75" restates the tax, it is not another charge
       if (/\btax\s*rate\b/.test(lower))                        { return; }
       if (/\btotal\s*tax\b/.test(lower))                        { totalTax = amt; return; }
       if (/\b(sales\s*)?tax\b/.test(lower) && !/taxable/.test(lower)) {
@@ -1248,9 +1232,9 @@
       if (PAY_LABEL.test(name)) return;
       var worded = /[A-Za-z]{2}/.test(name);
 
-      // a nameless negative — "2.20-" against an item code — is the line above's discount
+      // a nameless negative like "2.20-" against an item code is the line above's discount
       if (!worded && amt < 0 && out.items.length) {
-        out.items.push({ name: 'discount \u2014 ' + out.items[out.items.length - 1].name, price: amt });
+        out.items.push({ name: 'discount on ' + out.items[out.items.length - 1].name, price: amt });
         return;
       }
       if (!name || name.length < 2 || !worded) return;     // pure digits/symbols = not an item
@@ -1259,7 +1243,7 @@
       out.items.push({ name: name, price: amt });
     });
 
-    // a receipt often prints TAX and TOTAL TAX with the same figure — count it once
+    // a receipt often prints TAX and TOTAL TAX with the same figure; count it once
     if (totalTax !== null) {
       out.tax = totalTax;
     } else if (taxSeen.length) {
@@ -1268,7 +1252,7 @@
       out.tax = uniq.reduce(function (a, b) { return a + b; }, 0);
     }
 
-    // merchant guess: the first real line of text — store names sit above the address
+    // merchant guess: the first real line of text; store names sit above the address
     var best = '';
     for (var hi = 0; hi < header.length; hi++) {
       var h = header[hi];
@@ -1305,7 +1289,7 @@
       var s = document.createElement('script');
       s.src = src; s.async = true;
       s.onload = res;
-      s.onerror = function () { rej(new Error('could not reach the OCR library — check your connection')); };
+      s.onerror = function () { rej(new Error('could not load the OCR library, check your connection')); };
       document.head.appendChild(s);
     });
   }
@@ -1349,19 +1333,19 @@
     return Promise.resolve()
       .then(function () { return window.Tesseract ? null : loadScript(TESS + '/dist/tesseract.min.js'); })
       .then(function () {
-        onStep(0.10, 'loading the language model (first run only)…');
+        onStep(0.10, 'loading the language model');
         return Tesseract.createWorker('eng', 1, {
           workerPath: TESS + '/dist/worker.min.js',
           corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',
           langPath: 'https://tessdata.projectnaptha.com/4.0.0',
           logger: function (m) {
-            if (m.status === 'recognizing text') onStep(0.35 + m.progress * 0.6, 'reading the receipt…');
-            else if (/loading|initial/i.test(m.status || '')) onStep(0.15, 'warming up the engine…');
+            if (m.status === 'recognizing text') onStep(0.35 + m.progress * 0.6, 'reading the receipt');
+            else if (/loading|initial/i.test(m.status || '')) onStep(0.15, 'starting up');
           }
         });
       })
       .then(function (worker) {
-        onStep(0.32, 'reading the receipt…');
+        onStep(0.32, 'reading the receipt');
         return worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' })
           .then(function () { return worker.recognize(canvas); })
           .then(function (res) {
@@ -1424,10 +1408,10 @@
 
   function runLLM (engine, dataUrl, onStep) {
     var key = getKey(engine);
-    if (!key) return Promise.reject(new Error('No API key saved for that engine — add one under "Scanning engine".'));
+    if (!key) return Promise.reject(new Error('No API key saved. Add one under options.'));
     var m = String(dataUrl).match(/^data:(image\/[a-zA-Z+]+);base64,([\s\S]*)$/);
     if (!m) return Promise.reject(new Error('could not encode the image'));
-    onStep(0.35, 'sending to the vision model…');
+    onStep(0.35, 'sending to the model');
     if (engine === 'shared') quotaSpend();
 
     var url, opts, model = getModel(engine);
@@ -1484,13 +1468,13 @@
         if (!r.ok) {
           var detail = body;
           try { detail = JSON.parse(body).error.message; } catch (e) {}
-          throw new Error('API ' + r.status + ' — ' + String(detail).slice(0, 180));
+          throw new Error('API ' + r.status + ': ' + String(detail).slice(0, 180));
         }
         var j = JSON.parse(body);
-        onStep(0.9, 'tidying up the lines…');
+        onStep(0.9, 'reading the lines');
         if (provider === 'gemini') {
           var cand = (j.candidates || [])[0];
-          if (!cand) throw new Error('the model returned nothing — it may have blocked the image');
+          if (!cand) throw new Error('the model returned nothing, it may have blocked the image');
           return ((cand.content && cand.content.parts) || [])
             .map(function (part) { return part.text || ''; }).join('');
         }
@@ -1534,8 +1518,8 @@
 
   function showScanError (msg) {
     var b = $('#scan-error');
-    b.innerHTML = '<b>Scan failed</b> — ' + esc(msg) +
-      '<br>Your photo is still attached, so you can press <b>Type it in</b> and read the lines off it.';
+    b.innerHTML = '<b>Scan failed.</b> ' + esc(msg) +
+      '<br>Your photo is still attached, so you can press <b>Type it in</b> and read it off that.';
     b.classList.add('show');
   }
 
@@ -1547,10 +1531,10 @@
     var engine = $('#engine').value;
     if (engine === 'shared' && (!sharedOn() || quotaLeft() <= 0)) {
       engine = 'tesseract';
-      toast(sharedOn() ? 'daily shared scans used up — using free OCR' : 'using free OCR');
+      toast(sharedOn() ? 'out of free scans, using built-in OCR' : 'using built-in OCR');
     }
     $('#scan-error').classList.remove('show');
-    setProgress(0.05, 'opening the photo…');
+    setProgress(0.05, 'opening the photo');
 
     readFile(file)
       .then(loadImage)
@@ -1577,7 +1561,7 @@
         hideProgress();
         scanning = false;
         var n = parsed.items.length;
-        toast(n ? 'found ' + n + ' line' + (n === 1 ? '' : 's') : 'no lines found — add them by hand');
+        toast(n ? 'found ' + n + ' line' + (n === 1 ? '' : 's') : 'no lines found, add them by hand');
         goTo('items');
       })
       .catch(function (err) {
@@ -1585,7 +1569,7 @@
         hideProgress();
         console.error(err);
         // stay on this screen: an API key or model error needs reading and fixing here
-        showScanError(err && err.message ? err.message : 'something went wrong — try again');
+        showScanError(err && err.message ? err.message : 'something went wrong, try again');
         save();
       });
   }
@@ -1676,13 +1660,9 @@
   }
 
   var ENGINE_NOTES = {
-    shared: 'Runs on the site owner\u2019s Google key, so there is nothing for you to set up. ' +
-            'Capped per browser per day \u2014 once it runs out, scanning falls back to the free ' +
-            'built-in OCR. Add your own key below to lift the cap.',
-    anthropic: 'Get a key at <b>console.anthropic.com</b>. Paid, roughly a third of a cent per receipt.',
-    openai: 'Get a key at <b>platform.openai.com</b>. Paid, roughly a cent per receipt.',
-    gemini: 'Get a key at <b>aistudio.google.com</b>. Google offers a free tier with rate limits, ' +
-            'so this is usually the free way to get vision-model accuracy — check their current limits.'
+    anthropic: 'Key from console.anthropic.com. Paid, about a third of a cent per receipt.',
+    openai: 'Key from platform.openai.com. Paid, about a cent per receipt.',
+    gemini: 'Key from aistudio.google.com. Free tier available.'
   };
 
   function syncEngine () {
@@ -1697,34 +1677,20 @@
       try { stored = localStorage.getItem('split.v1.model.' + eng) || ''; } catch (e) {}
       $('#model').value = stored;
       $('#model').placeholder = MODEL_DEFAULTS[eng] || '';
-      $('#key-note').innerHTML = (ENGINE_NOTES[eng] || '') +
-        ' The key is kept in this browser only and sent straight to the provider. ' +
-        'If the model name is ever retired, put a current one in the model box.';
+      $('#key-note').innerHTML = (ENGINE_NOTES[eng] || '') + ' Stored in this browser only.';
     }
     try { localStorage.setItem(LS.engine, eng); } catch (e) {}
 
-    var line = $('#engine-line'), label = {
-      tesseract: 'the free built-in OCR', anthropic: 'Claude vision',
-      openai: 'OpenAI vision', gemini: 'Gemini vision', shared: 'Gemini vision'
-    }[eng];
-    if (eng === 'shared') {
-      var left = quotaLeft();
-      line.innerHTML = left > 0
-        ? 'Reading with <b>Gemini vision</b> \u2014 <b>' + left + '</b> of ' + SHARED_DAILY_LIMIT +
-          ' free scans left today. <button type="button" id="open-settings">change</button>'
-        : 'Free Gemini scans are used up for today \u2014 falling back to the <b>built-in OCR</b>. ' +
-          '<button type="button" id="open-settings">use your own key</button>';
-    } else if (needsKey && !getKey(eng)) {
-      line.innerHTML = 'Set to <b>' + label + '</b>, but no key is saved yet \u2014 ' +
-        '<button type="button" id="open-settings">add one below</button> or it will fail.';
+    // stay quiet unless something is actually wrong
+    var warn = $('#engine-warn'), msg = '';
+    if (needsKey && !getKey(eng)) {
+      msg = '<b>No API key saved.</b> Add one under options, or scanning will fail.';
       $('#adv-settings').open = true;
-    } else {
-      line.innerHTML = 'Reading with <b>' + label + '</b>. ' +
-        '<button type="button" id="open-settings">change</button>';
+    } else if (eng === 'shared' && quotaLeft() <= 0) {
+      msg = '<b>Out of free scans for today.</b> Using the built-in OCR instead.';
     }
-    $('#open-settings').onclick = function () {
-      var d = $('#adv-settings'); d.open = true; d.scrollIntoView({ block: 'center' });
-    };
+    warn.innerHTML = msg;
+    warn.classList.toggle('show', !!msg);
   }
 
   function addItemAndFocus () {
@@ -1797,7 +1763,7 @@
       var me = state.people[0].id;
       state.items.forEach(function (it) { it.assignees = [me]; });
       save(); renderItems(); renderTallies(); syncBar();
-      toast('cleared — now tap people onto the lines they shared');
+      toast('cleared, now tap people onto their lines');
     };
 
     bindNum('tax', 'tax'); bindNum('fees', 'fees'); bindNum('tip', 'tip');
@@ -1847,7 +1813,7 @@
 
     $('#reset-all').onclick = function (e) {
       e.preventDefault();
-      if (!confirm('Clear this receipt and start over? Your saved names are kept.')) return;
+      if (!confirm('Clear this receipt and start over? Saved names are kept.')) return;
       try { localStorage.removeItem(LS.state); } catch (err) {}
       location.reload();
     };
@@ -1896,7 +1862,7 @@
     var start = restored && state.step ? state.step : 'people';
     if (start !== 'people' && !state.items.length) start = 'people';
     goTo(start);
-    if (restored && state.items.length) toast('picked up where you left off');
+    if (restored && state.items.length) toast('restored your last receipt');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
