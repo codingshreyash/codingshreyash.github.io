@@ -7,7 +7,7 @@
     document.documentElement.setAttribute('data-theme', t);
   })();
 </script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://generativelanguage.googleapis.com;">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>split | Shreyash Ranjan</title>
@@ -289,12 +289,6 @@
     padding:10px 12px;font-size:12px;margin-bottom:12px;display:none}
   .banner.show{display:block}
   .banner b{color:var(--warn)}
-  details.adv{border-top:1px dashed var(--hair);margin-top:16px;padding-top:12px}
-  details.adv summary{cursor:pointer;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);list-style:none}
-  details.adv summary::-webkit-details-marker{display:none}
-  details.adv summary::before{content:"▸ ";color:var(--accent)}
-  details.adv[open] summary::before{content:"▾ "}
-  details.adv .body{padding-top:12px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media (max-width:560px){ .row2{grid-template-columns:1fr} }
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(10px);
@@ -364,7 +358,6 @@
       <input type="file" id="file-camera" accept="image/*" capture="environment" class="sr" />
       <input type="file" id="file-upload" accept="image/*" class="sr" />
 
-      <div class="banner" id="engine-warn" style="margin-top:12px"></div>
       <div class="banner" id="scan-error" style="margin-top:12px"></div>
 
       <div class="progress" id="progress" hidden>
@@ -372,32 +365,6 @@
         <div class="bar"><i id="progress-bar"></i></div>
       </div>
 
-      <details class="adv" id="adv-settings">
-        <summary>options</summary>
-        <div class="body">
-          <div class="row2">
-            <div>
-              <label class="field" for="engine">engine</label>
-              <select id="engine">
-                <option value="shared" id="opt-shared">Gemini (free)</option>
-                <option value="tesseract">Built-in OCR (free, offline)</option>
-                <option value="anthropic">Claude (your key)</option>
-                <option value="gemini">Gemini (your key)</option>
-                <option value="openai">OpenAI (your key)</option>
-              </select>
-            </div>
-            <div id="key-wrap" hidden>
-              <label class="field" for="apikey">api key</label>
-              <input type="password" id="apikey" placeholder="paste your key" autocomplete="off" spellcheck="false" />
-            </div>
-          </div>
-          <div id="model-wrap" hidden style="margin-top:10px">
-            <label class="field" for="model">model (blank for default)</label>
-            <input type="text" id="model" autocomplete="off" spellcheck="false" />
-          </div>
-          <p class="note" id="key-note" style="margin:10px 0 0" hidden></p>
-        </div>
-      </details>
     </div>
   </section>
 
@@ -509,13 +476,15 @@
   'use strict';
 
   /* ==================================================================
-     SHARED GEMINI KEY. PASTE YOUR KEY BETWEEN THE QUOTES BELOW.
+     GEMINI KEY. PASTE YOUR KEY BETWEEN THE QUOTES BELOW.
      ------------------------------------------------------------------
-     Leave it as '' and the page behaves as before: free built-in OCR,
-     and visitors may add their own key.
+     This is the only place scanning is configured. Nobody using the page
+     enters a key or picks an engine.
 
-     Fill it in and every visitor gets model scanning on your Google
-     quota, capped at SHARED_DAILY_LIMIT scans per browser per day.
+     Left as '' every scan uses the free built-in OCR, so the page still
+     works. Filled in, every scan goes to Gemini on your Google quota,
+     capped at SHARED_DAILY_LIMIT per browser per day, falling back to
+     the built-in OCR once that runs out.
 
      READ THIS FIRST. This file is public, so the key is public:
        1. In Google AI Studio, restrict the key to HTTP referrers
@@ -526,8 +495,10 @@
           thing that actually bounds your spend.
        3. GitHub secret scanning may detect and revoke a key pushed to a
           public repo. If that happens, rotate it.
+     If Google retires the model, change GEMINI_MODEL below.
      ================================================================== */
   var SHARED_GEMINI_KEY = '';
+  var GEMINI_MODEL = 'gemini-3.6-flash';
   var SHARED_DAILY_LIMIT = 10;
 
   /* ============================================================
@@ -535,7 +506,7 @@
      ============================================================ */
   var PALETTE = ['#0090ff','#e5484d','#30a46c','#f76b15','#8e4ec6',
                  '#e93d82','#12a594','#ffb224','#3e63dd','#46a758'];
-  var LS = { state:'split.v1.state', recent:'split.v1.recent', engine:'split.v1.engine' };
+  var LS = { state:'split.v1.state', recent:'split.v1.recent' };
   var MAX_PEOPLE = 10;
 
   var $  = function (s, r) { return (r || document).querySelector(s); };
@@ -1367,22 +1338,7 @@
     'Do NOT include subtotal, total, tax, tip, change or payment lines in "items". ' +
     'Use 0 for any of tax/fees/tip/total you cannot find.';
 
-  var MODEL_DEFAULTS = {
-    anthropic: 'claude-sonnet-5',
-    openai: 'gpt-4o',
-    gemini: 'gemini-3.6-flash'
-  };
-  function getModel (engine) {
-    if (engine === 'shared') return MODEL_DEFAULTS.gemini;
-    var v = '';
-    try { v = (localStorage.getItem('split.v1.model.' + engine) || '').trim(); } catch (e) {}
-    return v || MODEL_DEFAULTS[engine] || '';
-  }
-  function setModel (engine, v) {
-    try { localStorage.setItem('split.v1.model.' + engine, v); } catch (e) {}
-  }
-
-  function sharedOn () { return !!SHARED_GEMINI_KEY; }
+  function geminiOn () { return !!SHARED_GEMINI_KEY; }
 
   function quotaToday () {
     var today = new Date().toISOString().slice(0, 10), q = { date: today, used: 0 };
@@ -1398,72 +1354,24 @@
     try { localStorage.setItem('split.v1.quota', JSON.stringify(q)); } catch (e) {}
   }
 
-  function getKey (engine) {
-    if (engine === 'shared') return SHARED_GEMINI_KEY;
-    try { return localStorage.getItem('split.v1.key.' + engine) || ''; } catch (e) { return ''; }
-  }
-  function setKey (engine, v) {
-    try { localStorage.setItem('split.v1.key.' + engine, v); } catch (e) {}
-  }
-
-  function runLLM (engine, dataUrl, onStep) {
-    var key = getKey(engine);
-    if (!key) return Promise.reject(new Error('No API key saved. Add one under options.'));
+  function runGemini (dataUrl, onStep) {
     var m = String(dataUrl).match(/^data:(image\/[a-zA-Z+]+);base64,([\s\S]*)$/);
     if (!m) return Promise.reject(new Error('could not encode the image'));
-    onStep(0.35, 'sending to the model');
-    if (engine === 'shared') quotaSpend();
+    onStep(0.35, 'reading the receipt');
+    quotaSpend();
 
-    var url, opts, model = getModel(engine);
-    var provider = (engine === 'shared') ? 'gemini' : engine;
-    if (provider === 'gemini') {
-      url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
-            encodeURIComponent(model) + ':generateContent';
-      opts = {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          contents: [{ parts: [
-            { inline_data: { mime_type: m[1], data: m[2] } },
-            { text: LLM_PROMPT }
-          ] }],
-          generationConfig: { temperature: 0, responseMimeType: 'application/json' }
-        })
-      };
-    } else if (provider === 'anthropic') {
-      url = 'https://api.anthropic.com/v1/messages';
-      opts = {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-api-key': key,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: model, max_tokens: 4096,
-          messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } },
-            { type: 'text', text: LLM_PROMPT }
-          ] }]
-        })
-      };
-    } else {
-      url = 'https://api.openai.com/v1/chat/completions';
-      opts = {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + key },
-        body: JSON.stringify({
-          model: model, max_tokens: 4096,
-          messages: [{ role: 'user', content: [
-            { type: 'text', text: LLM_PROMPT },
-            { type: 'image_url', image_url: { url: dataUrl } }
-          ] }]
-        })
-      };
-    }
-
-    return fetch(url, opts).then(function (r) {
+    return fetch('https://generativelanguage.googleapis.com/v1beta/models/' +
+                 encodeURIComponent(GEMINI_MODEL) + ':generateContent', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': SHARED_GEMINI_KEY },
+      body: JSON.stringify({
+        contents: [{ parts: [
+          { inline_data: { mime_type: m[1], data: m[2] } },
+          { text: LLM_PROMPT }
+        ] }],
+        generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+      })
+    }).then(function (r) {
       return r.text().then(function (body) {
         if (!r.ok) {
           var detail = body;
@@ -1472,15 +1380,10 @@
         }
         var j = JSON.parse(body);
         onStep(0.9, 'reading the lines');
-        if (provider === 'gemini') {
-          var cand = (j.candidates || [])[0];
-          if (!cand) throw new Error('the model returned nothing, it may have blocked the image');
-          return ((cand.content && cand.content.parts) || [])
-            .map(function (part) { return part.text || ''; }).join('');
-        }
-        return provider === 'anthropic'
-          ? (j.content || []).map(function (c) { return c.text || ''; }).join('')
-          : ((j.choices && j.choices[0] && j.choices[0].message.content) || '');
+        var cand = (j.candidates || [])[0];
+        if (!cand) throw new Error('the model returned nothing, it may have blocked the image');
+        return ((cand.content && cand.content.parts) || [])
+          .map(function (part) { return part.text || ''; }).join('');
       });
     });
   }
@@ -1528,11 +1431,9 @@
     if (!file || !/^image\//.test(file.type)) { toast('that needs to be an image'); return; }
     scanning = true;
 
-    var engine = $('#engine').value;
-    if (engine === 'shared' && (!sharedOn() || quotaLeft() <= 0)) {
-      engine = 'tesseract';
-      toast(sharedOn() ? 'out of free scans, using built-in OCR' : 'using built-in OCR');
-    }
+    // Gemini when it is configured and there are scans left, otherwise built-in OCR
+    var useGemini = geminiOn() && quotaLeft() > 0;
+    if (geminiOn() && !useGemini) toast('out of free scans today, using built-in OCR');
     $('#scan-error').classList.remove('show');
     setProgress(0.05, 'opening the photo');
 
@@ -1543,7 +1444,7 @@
         var view = preprocess(img, 1100);
         state.image = view.toDataURL('image/jpeg', 0.72);
 
-        if (engine === 'tesseract') {
+        if (!useGemini) {
           return runTesseract(preprocess(img, 1600), setProgress).then(function (text) {
             return parseReceipt(text);
           });
@@ -1553,7 +1454,7 @@
         send.width = Math.round(img.naturalWidth * s);
         send.height = Math.round(img.naturalHeight * s);
         send.getContext('2d').drawImage(img, 0, 0, send.width, send.height);
-        return runLLM(engine, send.toDataURL('image/jpeg', 0.85), setProgress)
+        return runGemini(send.toDataURL('image/jpeg', 0.85), setProgress)
           .then(parseLLMJson);
       })
       .then(function (parsed) {
@@ -1659,40 +1560,6 @@
     });
   }
 
-  var ENGINE_NOTES = {
-    anthropic: 'Key from console.anthropic.com. Paid, about a third of a cent per receipt.',
-    openai: 'Key from platform.openai.com. Paid, about a cent per receipt.',
-    gemini: 'Key from aistudio.google.com. Free tier available.'
-  };
-
-  function syncEngine () {
-    var eng = $('#engine').value;
-    var needsKey = eng !== 'tesseract' && eng !== 'shared';
-    $('#key-wrap').hidden = !needsKey;
-    $('#model-wrap').hidden = !needsKey;
-    $('#key-note').hidden = !needsKey;
-    if (needsKey) {
-      $('#apikey').value = getKey(eng);
-      var stored = '';
-      try { stored = localStorage.getItem('split.v1.model.' + eng) || ''; } catch (e) {}
-      $('#model').value = stored;
-      $('#model').placeholder = MODEL_DEFAULTS[eng] || '';
-      $('#key-note').innerHTML = (ENGINE_NOTES[eng] || '') + ' Stored in this browser only.';
-    }
-    try { localStorage.setItem(LS.engine, eng); } catch (e) {}
-
-    // stay quiet unless something is actually wrong
-    var warn = $('#engine-warn'), msg = '';
-    if (needsKey && !getKey(eng)) {
-      msg = '<b>No API key saved.</b> Add one under options, or scanning will fail.';
-      $('#adv-settings').open = true;
-    } else if (eng === 'shared' && quotaLeft() <= 0) {
-      msg = '<b>Out of free scans for today.</b> Using the built-in OCR instead.';
-    }
-    warn.innerHTML = msg;
-    warn.classList.toggle('show', !!msg);
-  }
-
   function addItemAndFocus () {
     state.items.push(newItem());
     save(); renderItems(); renderTallies(); syncBar();
@@ -1746,10 +1613,6 @@
         if (/^image\//.test(items[i].type)) { handleFile(items[i].getAsFile()); return; }
       }
     });
-
-    $('#engine').onchange = syncEngine;
-    $('#apikey').oninput = function () { setKey($('#engine').value, this.value.trim()); };
-    $('#model').oninput = function () { setModel($('#engine').value, this.value.trim()); };
 
     $('#add-item').onclick = addItemAndFocus;
     $('#add-item-2').onclick = addItemAndFocus;
@@ -1841,18 +1704,6 @@
     if (!state.people.length) { state.people.push(newPerson('Me')); state.people.push(newPerson('')); }
     state.people.forEach(function (p, i) { if (!p.color) p.color = PALETTE[i % PALETTE.length]; });
 
-    // no shared key baked in -> the option should not exist at all
-    if (!sharedOn()) {
-      var so = $('#opt-shared');
-      if (so) so.parentNode.removeChild(so);
-    }
-    var saved = '';
-    try { saved = localStorage.getItem(LS.engine) || ''; } catch (e) {}
-    if (saved === 'shared' && !sharedOn()) saved = '';
-    if (!saved) saved = sharedOn() ? 'shared' : 'tesseract';
-    $('#engine').value = saved;
-    if (!$('#engine').value) $('#engine').value = 'tesseract';
-    syncEngine();
     wire();
     renderPeople();
     renderItems();
