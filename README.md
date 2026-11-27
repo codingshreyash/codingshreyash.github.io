@@ -1,16 +1,16 @@
 # Shreyash Ranjan - Portfolio
 
-Personal portfolio website showcasing my experience in software engineering.
+Personal portfolio website showcasing my software engineering experience and projects.
 
 ## Live Site
-🌐 [shreyash-ranjan.com](https://shreyash-ranjan.com)  
-🔗 [codingshreyash.github.io](https://codingshreyash.github.io)
+- [shreyashranjan.com](https://shreyashranjan.com/)
+- [shreyashranjan.com/split/](https://shreyashranjan.com/split/) — Live AI receipt splitter
 
 ## Features
-- Typewriter animation for name
-- Dark mode toggle (warm amber terminal theme)
-- Fully responsive design
-- Clean, minimalist layout
+- Cool charcoal dark mode (default) and paper-notebook light mode toggle
+- Fast, reduced-motion-aware typewriter hero with quick resume, email copy, and social CTAs
+- Responsive sticky navigation and WCAG AA-compliant contrast across both themes
+- Optimized WebP/JPEG `<picture>` assets, SVG/PNG favicons, SEO JSON-LD, and `1200x630` Open Graph card
 
 ## Tech Stack
 - HTML5
@@ -20,8 +20,5 @@ Personal portfolio website showcasing my experience in software engineering.
 
 ## Quick Start
 1. Clone the repository
-2. Open `index.html` in your browser
+2. Open `index.html` in your browser (or run `python3 -m http.server`)
 3. That's it!
-
----
-*Built with ❤️ by Shreyash Ranjan*
