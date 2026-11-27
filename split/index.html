@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8" />
 <script>
   (function () {
     var t = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', t);
   })();
 </script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://cdn.jsdelivr.net https://tessdata.projectnaptha.com https://generativelanguage.googleapis.com;">
-<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https: http://localhost:* http://127.0.0.1:*;">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>split | Shreyash Ranjan</title>
 <meta name="description" content="Split a receipt with roommates. Take a photo, tap who had what, get exact per-person totals.">
@@ -18,7 +18,7 @@
 <meta name="theme-color" content="#f4f1ec" media="(prefers-color-scheme: light)">
 
 <meta property="og:title" content="split" />
-<meta property="og:description" content="Split a receipt with roommates. Nothing leaves your browser." />
+<meta property="og:description" content="Split a receipt with roommates. Snap a photo, tap who had what, get exact shares." />
 <meta property="og:url" content="https://shreyashranjan.com/split/" />
 <meta property="og:type" content="website" />
 
@@ -289,6 +289,31 @@
     padding:10px 12px;font-size:12px;margin-bottom:12px;display:none}
   .banner.show{display:block}
   .banner b{color:var(--warn)}
+  .banner .banner-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .banner ul.diff-list{margin:8px 0 0;padding-left:18px;font-size:11.5px;line-height:1.55;color:var(--ink)}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .panel-head h2{margin:0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+  .engine-pill{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.04em;
+    text-transform:uppercase;padding:3px 8px;border:1px solid var(--hair);background:var(--bg);color:var(--ink-2)}
+  .engine-pill .pdot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex:none}
+  .engine-pill.ai{border-color:var(--accent);color:var(--ink)}
+  .engine-pill.ai .pdot{background:var(--accent)}
+  .engine-pill.ok{border-color:var(--ok);color:var(--ok)}
+  .engine-pill.ok .pdot{background:var(--ok)}
+  .engine-pill.warn{border-color:var(--warn);color:var(--warn)}
+  .engine-pill.warn .pdot{background:var(--warn)}
+  .engine-pill.pulse .pdot{animation:pulseDot 1.1s ease-in-out infinite}
+  @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+  details.settings{border-top:1px dashed var(--hair);margin-top:14px;padding-top:10px}
+  details.settings summary{cursor:pointer;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);list-style:none;user-select:none}
+  details.settings summary::-webkit-details-marker{display:none}
+  details.settings summary::before{content:"▸ ";color:var(--accent)}
+  details.settings[open] summary::before{content:"▾ "}
+  details.settings .sbody{padding-top:12px}
+  details.settings .sfoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
+  input[type=url]{font-family:var(--mono);font-size:14px;color:var(--ink);background:var(--bg);
+    border:1px solid var(--hair);padding:9px 10px;min-height:40px;width:100%;border-radius:0}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media (max-width:560px){ .row2{grid-template-columns:1fr} }
   .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(10px);
@@ -314,7 +339,7 @@
 
   <section class="hero">
     <h1><span class="slash">/</span>split</h1>
-    <p>Split a receipt with roommates. Nothing leaves your browser.</p>
+    <p>Split a receipt with roommates. Snap a photo, tap who had what, get exact shares.</p>
   </section>
 
   <nav class="rail" aria-label="Steps">
@@ -336,8 +361,11 @@
     </div>
 
     <div class="panel">
-      <h2>The receipt</h2>
-      <p class="hint">Every line stays editable after the scan.</p>
+      <div class="panel-head">
+        <h2>The receipt</h2>
+        <span class="engine-pill" id="capture-engine-pill"><span class="pdot"></span><span id="capture-engine-text">Local OCR</span></span>
+      </div>
+      <p class="hint" id="capture-hint">Every line stays editable after the scan.</p>
       <div class="capture-row">
         <div class="drop" id="drop-camera" role="button" tabindex="0">
           <span class="big">▣</span>
@@ -365,18 +393,42 @@
         <div class="bar"><i id="progress-bar"></i></div>
       </div>
 
+      <details class="settings" id="scan-settings">
+        <summary>scan settings</summary>
+        <div class="sbody">
+          <div class="row2">
+            <div>
+              <label class="field" for="cfg-apikey">personal gemini key (optional)</label>
+              <input type="password" id="cfg-apikey" placeholder="AIza..." autocomplete="off" spellcheck="false" />
+            </div>
+            <div>
+              <label class="field" for="cfg-proxy">proxy url (optional override)</label>
+              <input type="url" id="cfg-proxy" placeholder="https://split-gemini-proxy....workers.dev" autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+          <div class="sfoot">
+            <span class="note">AI scans send only the receipt photo for reading; local OCR stays on-device. Keys stay in this browser only.</span>
+            <button class="btn sm ghost" type="button" id="cfg-clear">clear custom</button>
+          </div>
+        </div>
+      </details>
+
     </div>
   </section>
 
   <!-- ================= SCREEN 2: ITEMS ================= -->
   <section class="screen" id="screen-items">
+    <div class="banner" id="verify-banner"></div>
     <div class="banner" id="unassigned-banner"></div>
 
     <div class="panel">
       <div class="thumb-row" id="thumb-row" hidden>
         <div class="thumb" id="thumb"><img id="thumb-img" alt="Scanned receipt" /></div>
-        <div>
-          <h2 style="margin-bottom:4px">Check the lines</h2>
+        <div style="flex:1;min-width:0">
+          <div class="panel-head">
+            <h2>Check the lines</h2>
+            <span class="engine-pill" id="scan-status" hidden><span class="pdot"></span><span id="scan-status-text"></span></span>
+          </div>
           <p class="hint" style="margin:0">Tap the photo to enlarge. Fix anything the scan got wrong.</p>
         </div>
       </div>
@@ -403,15 +455,15 @@
       <div class="extras">
         <div>
           <label class="field" for="tax">tax</label>
-          <input type="number" inputmode="decimal" step="0.01" id="tax" placeholder="0.00" />
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="tax" placeholder="0.00" />
         </div>
         <div>
           <label class="field" for="fees">fees / delivery</label>
-          <input type="number" inputmode="decimal" step="0.01" id="fees" placeholder="0.00" />
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="fees" placeholder="0.00" />
         </div>
         <div>
           <label class="field" for="tip">tip</label>
-          <input type="number" inputmode="decimal" step="0.01" id="tip" placeholder="0" />
+          <input type="number" inputmode="decimal" step="0.01" min="0" id="tip" placeholder="0" />
           <div class="seg" id="tip-mode">
             <button type="button" data-mode="pct" aria-pressed="true">%</button>
             <button type="button" data-mode="amt" aria-pressed="false">$</button>
@@ -476,37 +528,38 @@
   'use strict';
 
   /* ==================================================================
-     GEMINI KEY. PASTE YOUR KEY BETWEEN THE QUOTES BELOW.
+     SCANNING CONFIGURATION
      ------------------------------------------------------------------
-     This is the only place scanning is configured. Nobody using the page
-     enters a key or picks an engine.
+     Default path: Cloudflare Worker proxy holding GEMINI_API_KEY as a
+     server secret (no API key is ever committed to this public repo).
+     Paste your deployed Worker URL below (e.g.
+     'https://split-gemini-proxy.<subdomain>.workers.dev').
 
-     Left as '' every scan uses the free built-in OCR, so the page still
-     works. Filled in, every scan goes to Gemini on your Google quota,
-     capped at SHARED_DAILY_LIMIT per browser per day, falling back to
-     the built-in OCR once that runs out.
-
-     READ THIS FIRST. This file is public, so the key is public:
-       1. In Google AI Studio, restrict the key to HTTP referrers
-          shreyashranjan.com/* and *.shreyashranjan.com/*
-       2. In Google Cloud Console set a daily cap on the Generative
-          Language API. The limit below is client-side and can be
-          bypassed by clearing storage; the Google-side cap is the only
-          thing that actually bounds your spend.
-       3. GitHub secret scanning may detect and revoke a key pushed to a
-          public repo. If that happens, rotate it.
-     If Google retires the model, change GEMINI_MODEL below.
+     Visitors can also optionally supply a personal Gemini API key or
+     custom proxy URL in "scan settings" (or via #key=... / #proxy=...)
+     stored only in their own browser's localStorage.
+     When neither a proxy nor a key is configured, scanning falls back
+     to the free in-browser Tesseract OCR.
      ================================================================== */
-  var SHARED_GEMINI_KEY = '';
-  var GEMINI_MODEL = 'gemini-3.6-flash';
-  var SHARED_DAILY_LIMIT = 10;
+  var DEFAULT_PROXY_URL = 'https://split-gemini-proxy.shreyashranjan.workers.dev';
+  var GEMINI_FAST_MODEL = 'gemini-3.5-flash-lite';
+  var GEMINI_VERIFY_MODEL = 'gemini-3.6-flash';
+  var SCAN_TIMEOUT_MS = 22000;
+  var PROXY_DAILY_LIMIT = 20;
 
   /* ============================================================
      constants + tiny helpers
      ============================================================ */
   var PALETTE = ['#0090ff','#e5484d','#30a46c','#f76b15','#8e4ec6',
                  '#e93d82','#12a594','#ffb224','#3e63dd','#46a758'];
-  var LS = { state:'split.v1.state', recent:'split.v1.recent' };
+  var LS = {
+    state: 'split.v1.state',
+    image: 'split.v1.image',
+    recent: 'split.v1.recent',
+    proxy: 'split.v1.proxy',
+    apiKey: 'split.v1.apikey',
+    quota: 'split.v1.quota'
+  };
   var MAX_PEOPLE = 10;
 
   var $  = function (s, r) { return (r || document).querySelector(s); };
@@ -526,11 +579,118 @@
   var toastTimer;
   function toast (msg) {
     var t = $('#toast'); t.textContent = msg; t.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1900);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2100);
   }
 
   /* ============================================================
-     state
+     config helpers (proxy / BYOK / URL hash import)
+     ============================================================ */
+  function normalizeProxyUrl (raw) {
+    var s = String(raw || '').trim().replace(/\/+$/, '').replace(/\/api\/scan$/i, '');
+    if (!s) return '';
+    if (/^https:\/\/[^\s/$.?#].[^\s]*$/i.test(s)) return s;
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(s)) return s;
+    return '';
+  }
+  function getSavedProxy () {
+    try { return normalizeProxyUrl(localStorage.getItem(LS.proxy) || ''); } catch (e) { return ''; }
+  }
+  function getEffectiveProxy () {
+    return getSavedProxy() || normalizeProxyUrl(DEFAULT_PROXY_URL);
+  }
+  function getApiKey () {
+    try { return String(localStorage.getItem(LS.apiKey) || '').trim(); } catch (e) { return ''; }
+  }
+  function setSavedProxy (val) {
+    var clean = normalizeProxyUrl(val);
+    try {
+      if (clean) localStorage.setItem(LS.proxy, clean);
+      else localStorage.removeItem(LS.proxy);
+    } catch (e) {}
+    return clean;
+  }
+  function setApiKey (val) {
+    var clean = String(val || '').trim();
+    try {
+      if (clean) localStorage.setItem(LS.apiKey, clean);
+      else localStorage.removeItem(LS.apiKey);
+    } catch (e) {}
+    return clean;
+  }
+  function importHashConfig () {
+    var hash = (window.location && window.location.hash || '').replace(/^#/, '');
+    if (!hash || (!/\bkey=/.test(hash) && !/\bproxy=/.test(hash))) return;
+    var params;
+    try { params = new URLSearchParams(hash); } catch (e) { return; }
+    var msgs = [];
+    if (params.has('key')) {
+      var k = setApiKey(params.get('key'));
+      if (k) msgs.push('saved Gemini key');
+    }
+    if (params.has('proxy')) {
+      var p = setSavedProxy(params.get('proxy'));
+      if (p) msgs.push('saved proxy URL');
+    }
+    try {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    } catch (e) {}
+    if (msgs.length) setTimeout(function () { toast(msgs.join(' + ')); }, 200);
+  }
+
+  function localDateKey () {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+  function quotaToday () {
+    var today = localDateKey(), q = { date: today, used: 0 };
+    try {
+      var raw = JSON.parse(localStorage.getItem(LS.quota) || 'null');
+      if (raw && raw.date === today) q = raw;
+    } catch (e) {}
+    return q;
+  }
+  function quotaLeft () { return Math.max(0, PROXY_DAILY_LIMIT - quotaToday().used); }
+  function quotaSpend () {
+    var q = quotaToday(); q.used += 1;
+    try { localStorage.setItem(LS.quota, JSON.stringify(q)); } catch (e) {}
+  }
+
+  function getScanBackend () {
+    var key = getApiKey();
+    if (key) return { mode: 'byok', apiKey: key };
+    var proxy = getEffectiveProxy();
+    if (proxy) {
+      if (quotaLeft() > 0) return { mode: 'proxy', proxyUrl: proxy };
+      return { mode: 'ocr', reason: 'quota' };
+    }
+    return { mode: 'ocr', reason: 'unconfigured' };
+  }
+
+  function renderCaptureEngine () {
+    var b = getScanBackend();
+    var pill = $('#capture-engine-pill'), txt = $('#capture-engine-text'), hint = $('#capture-hint');
+    if (!pill || !txt) return;
+    if (b.mode === 'byok') {
+      pill.className = 'engine-pill ai';
+      txt.textContent = 'Gemini Fast (Your Key)';
+      hint.textContent = 'Fast AI scan with automatic background verification. Every line stays editable.';
+    } else if (b.mode === 'proxy') {
+      pill.className = 'engine-pill ai';
+      txt.textContent = 'Gemini Fast';
+      hint.textContent = 'Fast AI scan with automatic background verification. Every line stays editable.';
+    } else {
+      pill.className = 'engine-pill';
+      txt.textContent = 'Local OCR';
+      hint.textContent = b.reason === 'quota'
+        ? 'Daily shared AI scans used up, using on-device OCR. Add a personal key in scan settings anytime.'
+        : 'Using on-device OCR. Add a Gemini key or proxy in scan settings for faster, cleaner scans.';
+    }
+  }
+
+  /* ============================================================
+     state (image stored in a separate localStorage key for speed)
      ============================================================ */
   var state = {
     step: 'people',
@@ -539,6 +699,7 @@
     tax: '', fees: '', tip: '', tipMode: 'pct',
     expectedTotal: null, expectedSubtotal: null,
     place: '', when: '',
+    scanEngine: '',
     image: null
   };
 
@@ -550,25 +711,33 @@
       color: free.length ? free[0] : PALETTE[state.people.length % PALETTE.length]
     };
   }
-  function newItem (name, price, all) {
+  function newItem (name, price, assignees) {
+    var list;
+    if (Array.isArray(assignees)) list = assignees.slice();
+    else if (assignees === false) list = [];
+    else list = state.people.map(function (p) { return p.id; });
     return {
       id: uid(),
       name: name || '',
       price: (price === 0 || price) ? Number(price).toFixed(2) : '',
-      assignees: all === false ? [] : state.people.map(function (p) { return p.id; })
+      assignees: list
     };
   }
 
   function save () {
     try {
-      localStorage.setItem(LS.state, JSON.stringify(state));
+      var snap = {};
+      Object.keys(state).forEach(function (k) { if (k !== 'image') snap[k] = state[k]; });
+      localStorage.setItem(LS.state, JSON.stringify(snap));
+    } catch (e) {}
+  }
+  function saveImage (dataUrl) {
+    state.image = dataUrl || null;
+    try {
+      if (state.image) localStorage.setItem(LS.image, state.image);
+      else localStorage.removeItem(LS.image);
     } catch (e) {
-      // a receipt photo can push us past the ~5MB quota; the numbers matter more than the picture
-      try {
-        var img = state.image; state.image = null;
-        localStorage.setItem(LS.state, JSON.stringify(state));
-        state.image = img;
-      } catch (e2) {}
+      // quota exceeded: keep image in memory for this session, numbers remain persisted
     }
   }
   function load () {
@@ -577,7 +746,17 @@
       if (!raw) return false;
       var s = JSON.parse(raw);
       if (!s || !Array.isArray(s.people)) return false;
-      Object.keys(state).forEach(function (k) { if (s[k] !== undefined) state[k] = s[k]; });
+      Object.keys(state).forEach(function (k) {
+        if (k !== 'image' && s[k] !== undefined) state[k] = s[k];
+      });
+      var img = null;
+      try { img = localStorage.getItem(LS.image); } catch (e) {}
+      if (!img && s.image) {
+        saveImage(s.image);
+        save();
+      } else {
+        state.image = img || null;
+      }
       return true;
     } catch (e) { return false; }
   }
@@ -594,10 +773,10 @@
   }
 
   /* ============================================================
-     split math: integer cents, largest-remainder allocation
-     so the parts always add back up to the whole
+     split math: integer cents, largest-remainder allocation with
+     fair cumulative tie-breaking across items + orphan isolation
      ============================================================ */
-  function distribute (total, weights) {
+  function distribute (total, weights, bias) {
     var n = weights.length, out = new Array(n).fill(0), i;
     if (!n || total === 0) return out;
     var w = weights.slice(), sum = 0;
@@ -612,8 +791,13 @@
       floors.push(f); acc += f;
     }
     var rem = total - acc;                                    // always 0..n-1
-    var order = exact.map(function (e, k) { return { k: k, frac: e - Math.floor(e) }; })
-                     .sort(function (a, b) { return b.frac - a.frac || a.k - b.k; });
+    var order = exact.map(function (e, k) {
+      return { k: k, frac: e - Math.floor(e), b: bias ? (bias[k] || 0) : 0 };
+    }).sort(function (a, b) {
+      if (Math.abs(b.frac - a.frac) > 1e-9) return b.frac - a.frac;
+      if (Math.abs(a.b - b.b) > 1e-9) return a.b - b.b;
+      return a.k - b.k;
+    });
     for (i = 0; i < n; i++) out[i] = floors[i];
     for (i = 0; i < rem; i++) out[order[i % n].k] += 1;
     return out;
@@ -621,8 +805,8 @@
 
   function compute () {
     var ids = state.people.map(function (p) { return p.id; });
-    var owed = {}, lines = {};
-    ids.forEach(function (id) { owed[id] = 0; lines[id] = []; });
+    var owed = {}, lines = {}, roundErr = {};
+    ids.forEach(function (id) { owed[id] = 0; lines[id] = []; roundErr[id] = 0; });
 
     var subtotal = 0, orphanCents = 0, orphanCount = 0;
 
@@ -631,28 +815,50 @@
       subtotal += c;
       var a = it.assignees.filter(function (id) { return ids.indexOf(id) > -1; });
       if (!a.length) { orphanCents += c; if (c) orphanCount++; return; }
-      var parts = distribute(c, a.map(function () { return 1; }));
+      var bias = a.map(function (id) { return roundErr[id] || 0; });
+      var parts = distribute(c, a.map(function () { return 1; }), bias);
+      var exactEach = c / a.length;
       a.forEach(function (id, i) {
         owed[id] += parts[i];
+        roundErr[id] = (roundErr[id] || 0) + (parts[i] - exactEach);
         lines[id].push({ name: it.name || 'item', cents: parts[i], ways: a.length });
       });
     });
 
-    var taxC = cents(state.tax);
-    var feeC = cents(state.fees);
+    var taxC = Math.max(0, cents(state.tax));
+    var feeC = Math.max(0, cents(state.fees));
+    var tipVal = Math.max(0, parseFloat(state.tip) || 0);
     var tipC = state.tipMode === 'pct'
-      ? Math.round(subtotal * ((parseFloat(state.tip) || 0) / 100))
-      : cents(state.tip);
+      ? Math.max(0, Math.round(subtotal * (tipVal / 100)))
+      : Math.max(0, cents(state.tip));
 
-    // extras ride along in proportion to what each person's own items came to
+    // extras ride along in proportion to each person's items;
+    // unassigned items hold their own proportional share so nobody else overpays
+    var buckets = ids.slice();
     var weights = ids.map(function (id) { return Math.max(0, owed[id]); });
+    var orphanExtras = 0;
+    if (orphanCents > 0) {
+      buckets.push('__orphan__');
+      weights.push(orphanCents);
+      roundErr['__orphan__'] = 0;
+    }
+
+    var weightSum = weights.reduce(function (s, v) { return s + v; }, 0);
     [['tax', taxC], ['fees', feeC], ['tip', tipC]].forEach(function (pair) {
-      if (!pair[1]) return;
-      var parts = distribute(pair[1], weights);
-      ids.forEach(function (id, i) {
+      if (!pair[1] || !buckets.length) return;
+      var bBias = buckets.map(function (id) { return roundErr[id] || 0; });
+      var parts = distribute(pair[1], weights, bBias);
+      buckets.forEach(function (id, i) {
+        var effW = weightSum > 0 ? weights[i] : 1;
+        var effSum = weightSum > 0 ? weightSum : buckets.length;
+        roundErr[id] = (roundErr[id] || 0) + (parts[i] - (pair[1] * effW / effSum));
         if (!parts[i]) return;
-        owed[id] += parts[i];
-        lines[id].push({ name: pair[0], cents: parts[i], extra: true });
+        if (id === '__orphan__') {
+          orphanExtras += parts[i];
+        } else {
+          owed[id] += parts[i];
+          lines[id].push({ name: pair[0], cents: parts[i], extra: true });
+        }
       });
     });
 
@@ -660,7 +866,8 @@
       ids: ids, owed: owed, lines: lines,
       subtotal: subtotal, taxC: taxC, feeC: feeC, tipC: tipC,
       grand: subtotal + taxC + feeC + tipC,
-      orphanCents: orphanCents, orphanCount: orphanCount
+      orphanCents: orphanCents, orphanExtras: orphanExtras,
+      orphanTotal: orphanCents + orphanExtras, orphanCount: orphanCount
     };
   }
 
@@ -681,7 +888,8 @@
       sw.onclick = function () {
         p.color = PALETTE[(PALETTE.indexOf(p.color) + 1) % PALETTE.length];
         sw.style.background = p.color;
-        save(); renderItems(); renderTallies();
+        save();
+        if (state.step === 'items') { renderItems(); renderTallies(); }
       };
 
       var nm = el('input');
@@ -690,7 +898,11 @@
       nm.placeholder = idx === 0 ? 'me' : 'name';
       nm.maxLength = 18;
       nm.setAttribute('aria-label', 'Name for person ' + (idx + 1));
-      nm.oninput = function () { p.name = nm.value; save(); renderItems(); renderTallies(); syncBar(); };
+      nm.oninput = function () {
+        p.name = nm.value;
+        save();
+        syncBar();
+      };
 
       var rm = el('button', 'rm');
       rm.type = 'button';
@@ -702,7 +914,8 @@
         state.items.forEach(function (it) {
           it.assignees = it.assignees.filter(function (id) { return id !== p.id; });
         });
-        save(); renderPeople(); renderItems(); renderTallies(); syncBar();
+        save(); renderPeople(); syncBar();
+        if (state.step === 'items') { renderItems(); renderTallies(); }
       };
 
       row.appendChild(sw); row.appendChild(nm); row.appendChild(rm);
@@ -736,7 +949,8 @@
     state.items.forEach(function (it) {
       if (it.assignees.length === state.people.length - 1) it.assignees.push(p.id);
     });
-    save(); renderPeople(); renderItems(); renderTallies(); syncBar();
+    save(); renderPeople(); syncBar();
+    if (state.step === 'items') { renderItems(); renderTallies(); }
   }
 
   /* ============================================================
@@ -897,6 +1111,17 @@
       t.appendChild(s);
       box.appendChild(t);
     });
+    if (r.orphanCount > 0) {
+      var u = el('div', 'tally');
+      u.style.borderColor = 'var(--warn)';
+      u.style.color = 'var(--warn)';
+      var ub = el('span', 'bead'); ub.style.background = 'var(--warn)';
+      u.appendChild(ub);
+      u.appendChild(document.createTextNode('unassigned '));
+      var us = el('b'); us.textContent = money(r.orphanTotal);
+      u.appendChild(us);
+      box.appendChild(u);
+    }
     if (state.people.length) {
       var tot = el('div', 'tally');
       tot.style.borderStyle = 'dashed';
@@ -905,16 +1130,21 @@
     }
   }
 
-  // the receipt prints its own total; compare against it before trusting the scan
+  // the receipt prints its own subtotal/total; compare against it before trusting the scan
   function renderRecon (r) {
     var rc = $('#recon');
     var printed, mine, label;
     // prefer the printed subtotal: it checks the line items alone, without
-    // depending on whether tax got typed in yet
+    // depending on whether tax or tip got typed in yet
     if (state.expectedSubtotal != null) {
       printed = cents(state.expectedSubtotal); mine = r.subtotal; label = 'subtotal';
     } else if (state.expectedTotal != null) {
-      printed = cents(state.expectedTotal); mine = r.subtotal + r.taxC + r.feeC; label = 'total';
+      printed = cents(state.expectedTotal);
+      var preTip = r.subtotal + r.taxC + r.feeC;
+      var withTip = r.grand;
+      mine = (r.tipC > 0 && (withTip === printed || Math.abs(withTip - printed) < Math.abs(preTip - printed)))
+        ? withTip : preTip;
+      label = 'total';
     } else { rc.hidden = true; return; }
     if (!state.items.length) { rc.hidden = true; return; }
 
@@ -936,9 +1166,10 @@
   function refreshBanner () {
     var r = compute(), b = $('#unassigned-banner');
     if (r.orphanCount > 0) {
+      var extraNote = r.orphanExtras > 0 ? ' (+ ' + money(r.orphanExtras) + ' proportional tax/fees/tip)' : '';
       b.innerHTML = '<b>' + r.orphanCount + ' line' + (r.orphanCount > 1 ? 's have' : ' has') +
         ' nobody on ' + (r.orphanCount > 1 ? 'them.' : 'it.') + '</b> ' + money(r.orphanCents) +
-        ' is not going to anyone.';
+        extraNote + ' is unassigned and kept out of everyone\'s share.';
       b.classList.add('show');
     } else {
       b.classList.remove('show');
@@ -953,6 +1184,7 @@
     $('#out-place').textContent = (state.place || '').trim() || 'Receipt';
     $('#out-when').textContent = (state.when || '').trim() || todayLabel();
     $('#out-grand').textContent = money(r.grand);
+    $('#expand-all').textContent = 'show every line';
 
     var bits = [money(r.subtotal) + ' items'];
     if (r.taxC) bits.push(money(r.taxC) + ' tax');
@@ -1014,11 +1246,14 @@
     if (r.orphanCount > 0) {
       var w = el('div', 'share');
       w.style.borderColor = 'var(--warn)';
+      var detail = r.orphanExtras > 0
+        ? ' (' + money(r.orphanCents) + ' items + ' + money(r.orphanExtras) + ' proportional tax/fees/tip)'
+        : '';
       w.innerHTML = '<div class="share-top"><span class="bead" style="background:var(--warn)"></span>' +
         '<div class="nm" style="color:var(--warn)">unassigned</div>' +
-        '<div class="amt" style="color:var(--warn)">' + money(r.orphanCents) + '</div></div>' +
+        '<div class="amt" style="color:var(--warn)">' + money(r.orphanTotal) + '</div></div>' +
         '<div class="note" style="margin-top:8px">' + r.orphanCount +
-        ' line(s) have nobody on them, so this is missing from the shares above.</div>';
+        ' line(s) have nobody on them' + detail + ', so this is excluded from the shares above.</div>';
       host.appendChild(w);
     }
   }
@@ -1026,17 +1261,46 @@
   function mergeLines (lines) {
     var order = [], map = {};
     lines.forEach(function (l) {
-      var label = l.extra ? l.name : (l.name + (l.ways > 1 ? ' (÷' + l.ways + ')' : ''));
-      if (!map[label]) { map[label] = { label: label, cents: 0 }; order.push(label); }
-      map[label].cents += l.cents;
+      var base = l.extra ? l.name : (l.name + (l.ways > 1 ? ' (÷' + l.ways + ')' : ''));
+      var key = (l.extra ? 'E:' : 'I:') + base;
+      if (!map[key]) { map[key] = { base: base, cents: 0, count: 0, extra: !!l.extra }; order.push(key); }
+      map[key].cents += l.cents;
+      map[key].count += 1;
     });
-    return order.map(function (k) { return map[k]; });
+    return order.map(function (k) {
+      var m = map[k];
+      return {
+        label: (!m.extra && m.count > 1) ? (m.count + '× ' + m.base) : m.base,
+        cents: m.cents
+      };
+    });
   }
 
   function todayLabel () {
     var d = new Date();
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             .replace(',', '');
+  }
+  function formatReceiptDate (raw) {
+    var s = String(raw || '').trim();
+    if (!s) return todayLabel();
+    var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m) {
+      var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '');
+      }
+    }
+    var m2 = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    if (m2) {
+      var yr = Number(m2[3]);
+      if (yr < 100) yr += 2000;
+      var d2 = new Date(yr, Number(m2[1]) - 1, Number(m2[2]));
+      if (!isNaN(d2.getTime())) {
+        return d2.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).replace(',', '');
+      }
+    }
+    return s;
   }
 
   function personText (p, r) {
@@ -1163,8 +1427,8 @@
 
   function parseReceipt (text) {
     var raw = String(text || '').split(/\r?\n/);
-    var out = { items: [], tax: null, tip: null, total: null, subtotal: null, place: '' };
-    var header = [], taxSeen = [], totalTax = null;
+    var out = { items: [], tax: null, fees: null, tip: null, total: null, subtotal: null, place: '', date: '' };
+    var header = [], taxSeen = [], feeSum = 0, totalTax = null;
 
     raw.forEach(function (line, li) {
       var t = line.replace(/\s+/g, ' ').trim();
@@ -1186,16 +1450,23 @@
       var amt = parseMoney(m[1], t);
       if (amt === null) return;
 
-      if (/sub\s*-?\s*total/.test(lower))                       { out.subtotal = amt; return; }
+      if (/sub\s*-?\s*total|total\s+before\s+tax|pre[-\s]*tax\s+total/.test(lower)) { out.subtotal = amt; return; }
       // "A 7.0 % TAX RATE  1.75" restates the tax, it is not another charge
       if (/\btax\s*rate\b/.test(lower))                        { return; }
       if (/\btotal\s*tax\b/.test(lower))                        { totalTax = amt; return; }
-      if (/\b(sales\s*)?tax\b/.test(lower) && !/taxable/.test(lower)) {
-        taxSeen.push(amt); return;
+      if (/\b(sales\s*)?tax\b/.test(lower) && !/taxable|before\s*tax|pre[-\s]*tax|tax\s*free/.test(lower)) {
+        var taxLabel = t.slice(0, m.index).replace(/[^a-z]/gi, '').toLowerCase();
+        taxSeen.push({ label: taxLabel || 'tax', amt: amt });
+        return;
+      }
+      if (/\b(delivery|service|bag|bottle|regulatory|processing|convenience)\s*fee\b|\bcrv\b/i.test(lower)) {
+        feeSum += Math.abs(amt);
+        return;
       }
       if (/\b(tip|gratuity)\b/.test(lower))                     { out.tip = amt; return; }
       if (/\b(grand\s*)?total\b|\bamount\s+due\b|\bbalance\s+due\b/.test(lower)) {
-        if (out.total === null) out.total = amt; return;
+        // take the LAST matching total so "TOTAL BEFORE TAX" doesn't shadow "GRAND TOTAL"
+        out.total = amt; return;
       }
       if (NOISE.test(lower) || NOISE_LABEL.test(lower)) return;
 
@@ -1214,14 +1485,19 @@
       out.items.push({ name: name, price: amt });
     });
 
-    // a receipt often prints TAX and TOTAL TAX with the same figure; count it once
+    // prefer TOTAL TAX; otherwise deduplicate by label+amount so distinct named taxes
+    // (e.g. STATE TAX 1.50 + CITY TAX 1.50) both sum while repeated TAX lines don't
     if (totalTax !== null) {
       out.tax = totalTax;
     } else if (taxSeen.length) {
-      var uniq = [];
-      taxSeen.forEach(function (v) { if (uniq.indexOf(v) === -1) uniq.push(v); });
-      out.tax = uniq.reduce(function (a, b) { return a + b; }, 0);
+      var seenTaxKey = {}, taxAcc = 0;
+      taxSeen.forEach(function (entry) {
+        var key = entry.label + ':' + entry.amt.toFixed(2);
+        if (!seenTaxKey[key]) { seenTaxKey[key] = 1; taxAcc += entry.amt; }
+      });
+      out.tax = Math.round(taxAcc * 100) / 100;
     }
+    if (feeSum > 0) out.fees = Math.round(feeSum * 100) / 100;
 
     // merchant guess: the first real line of text; store names sit above the address
     var best = '';
@@ -1265,7 +1541,22 @@
     });
   }
 
-  // grayscale + upscale + contrast stretch: cheap, and it moves the needle a lot on receipt tape
+  // fast full-color resize for Gemini & lightbox (caps BOTH width <= 1200 and height <= 2400)
+  function resizeColor (img, maxW, maxH, quality) {
+    var w0 = img.naturalWidth || img.width || 1;
+    var h0 = img.naturalHeight || img.height || 1;
+    var s = Math.min(1, maxW / w0, maxH / h0);
+    var c = el('canvas');
+    c.width = Math.max(1, Math.round(w0 * s));
+    c.height = Math.max(1, Math.round(h0 * s));
+    var ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', quality || 0.80);
+  }
+
+  // grayscale + upscale + contrast stretch: used ONLY for Tesseract local OCR
   function preprocess (img, maxEdge) {
     var w0 = img.naturalWidth || img.width, h0 = img.naturalHeight || img.height;
     var scale = Math.min(2.5, Math.max(0.4, (maxEdge || 1600) / Math.max(1, w0)));
@@ -1304,19 +1595,19 @@
     return Promise.resolve()
       .then(function () { return window.Tesseract ? null : loadScript(TESS + '/dist/tesseract.min.js'); })
       .then(function () {
-        onStep(0.10, 'loading the language model');
+        onStep(0.12, 'loading local OCR model');
         return Tesseract.createWorker('eng', 1, {
           workerPath: TESS + '/dist/worker.min.js',
           corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',
           langPath: 'https://tessdata.projectnaptha.com/4.0.0',
           logger: function (m) {
-            if (m.status === 'recognizing text') onStep(0.35 + m.progress * 0.6, 'reading the receipt');
-            else if (/loading|initial/i.test(m.status || '')) onStep(0.15, 'starting up');
+            if (m.status === 'recognizing text') onStep(0.35 + m.progress * 0.6, 'reading the receipt (local OCR)');
+            else if (/loading|initial/i.test(m.status || '')) onStep(0.18, 'starting local OCR');
           }
         });
       })
       .then(function (worker) {
-        onStep(0.32, 'reading the receipt');
+        onStep(0.32, 'reading the receipt (local OCR)');
         return worker.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' })
           .then(function () { return worker.recognize(canvas); })
           .then(function (res) {
@@ -1327,91 +1618,370 @@
       });
   }
 
+  var RECEIPT_JSON_SCHEMA = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      place: { type: 'string', description: 'Store or restaurant name, or empty string if unknown' },
+      date: { type: 'string', description: 'Receipt date (prefer YYYY-MM-DD), or empty string if unknown' },
+      items: {
+        type: 'array',
+        items: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            name: { type: 'string', description: 'Readable item name with abbreviations expanded' },
+            price: { type: 'number', description: 'Extended price charged for this line; negative for discounts/coupons' }
+          },
+          required: ['name', 'price']
+        }
+      },
+      subtotal: { type: ['number', 'null'], description: 'Printed subtotal before tax/tip, or null if not printed' },
+      tax: { type: ['number', 'null'], description: 'Total tax charged (sum separate tax lines), or null if none' },
+      fees: { type: ['number', 'null'], description: 'Delivery, service, bag, or CRV fees not listed as items, or null if none' },
+      tip: { type: ['number', 'null'], description: 'Printed tip or gratuity, or null if none' },
+      total: { type: ['number', 'null'], description: 'Printed final total charged, or null if not printed' }
+    },
+    required: ['place', 'date', 'items', 'subtotal', 'tax', 'fees', 'tip', 'total']
+  };
+
   var LLM_PROMPT =
-    'This is a photo of a purchase receipt. Extract every purchased line item.\n' +
-    'Reply with ONLY a JSON object, no prose and no markdown fence:\n' +
-    '{"place":string,"date":string,"items":[{"name":string,"price":number}],' +
-    '"tax":number,"fees":number,"tip":number,"total":number}\n' +
-    'Rules: expand abbreviations into readable names (e.g. "ORG CHKN THGH" -> ' +
-    '"Organic Chicken Thighs"). Use the extended price actually charged for that line. ' +
-    'Coupons, discounts and markdowns are separate items with a negative price. ' +
-    'Do NOT include subtotal, total, tax, tip, change or payment lines in "items". ' +
-    'Use 0 for any of tax/fees/tip/total you cannot find.';
+    'Extract every purchased line item and receipt total from this receipt photo.\n' +
+    'Rules:\n' +
+    '- Expand abbreviations into readable names (e.g. "ORG CHKN THGH" -> "Organic Chicken Thighs").\n' +
+    '- Use the extended line price actually charged on the receipt (not unit price when qty > 1).\n' +
+    '- Represent coupons, instant savings, and markdowns as separate items with a negative price; do NOT subtract them from the item price as well.\n' +
+    '- Do NOT include subtotal, total, tax, tip, fees, change, or payment lines in "items".\n' +
+    '- Sum multiple tax lines (e.g. state + local) into "tax". Put delivery/service/bag/CRV fees in "fees".\n' +
+    '- Verify internally that sum(items) matches "subtotal" (when printed) and subtotal + tax + fees + tip matches "total".\n' +
+    '- Use null for any of subtotal/tax/fees/tip/total that is not printed on the receipt.';
 
-  function geminiOn () { return !!SHARED_GEMINI_KEY; }
-
-  function quotaToday () {
-    var today = new Date().toISOString().slice(0, 10), q = { date: today, used: 0 };
-    try {
-      var raw = JSON.parse(localStorage.getItem('split.v1.quota') || 'null');
-      if (raw && raw.date === today) q = raw;
-    } catch (e) {}
-    return q;
+  function fetchWithTimeout (url, opts, timeoutMs, externalSignal) {
+    var ctrl = new AbortController();
+    var timedOut = false;
+    var timer = setTimeout(function () { timedOut = true; ctrl.abort(); }, timeoutMs || SCAN_TIMEOUT_MS);
+    var onExtAbort = function () { ctrl.abort(); };
+    if (externalSignal) {
+      if (externalSignal.aborted) { clearTimeout(timer); ctrl.abort(); }
+      else externalSignal.addEventListener('abort', onExtAbort, { once: true });
+    }
+    var reqOpts = Object.assign({}, opts, { signal: ctrl.signal });
+    return fetch(url, reqOpts).then(function (r) {
+      clearTimeout(timer);
+      if (externalSignal) externalSignal.removeEventListener('abort', onExtAbort);
+      return r;
+    }, function (err) {
+      clearTimeout(timer);
+      if (externalSignal) externalSignal.removeEventListener('abort', onExtAbort);
+      if (timedOut) throw new Error('scan timed out, check your connection and try again');
+      throw err;
+    });
   }
-  function quotaLeft () { return Math.max(0, SHARED_DAILY_LIMIT - quotaToday().used); }
-  function quotaSpend () {
-    var q = quotaToday(); q.used += 1;
-    try { localStorage.setItem('split.v1.quota', JSON.stringify(q)); } catch (e) {}
+
+  function parseOptionalNum (v) {
+    if (v === null || v === undefined || v === '') return null;
+    var n = parseFloat(v);
+    return isFinite(n) ? Math.round(n * 100) / 100 : null;
   }
 
-  function runGemini (dataUrl, onStep) {
-    var m = String(dataUrl).match(/^data:(image\/[a-zA-Z+]+);base64,([\s\S]*)$/);
-    if (!m) return Promise.reject(new Error('could not encode the image'));
-    onStep(0.35, 'reading the receipt');
-    quotaSpend();
+  function normalizeParsedReceipt (j) {
+    j = j || {};
+    var items = (Array.isArray(j.items) ? j.items : []).filter(function (it) {
+      return it && String(it.name || '').trim() && isFinite(parseFloat(it.price));
+    }).map(function (it) {
+      return {
+        name: pretty(String(it.name)),
+        price: Math.round(parseFloat(it.price) * 100) / 100
+      };
+    });
+    return {
+      place: j.place ? pretty(String(j.place)) : '',
+      date: j.date ? String(j.date).trim() : '',
+      items: items,
+      subtotal: parseOptionalNum(j.subtotal),
+      tax: parseOptionalNum(j.tax),
+      fees: parseOptionalNum(j.fees),
+      tip: parseOptionalNum(j.tip),
+      total: parseOptionalNum(j.total)
+    };
+  }
 
-    return fetch('https://generativelanguage.googleapis.com/v1beta/models/' +
-                 encodeURIComponent(GEMINI_MODEL) + ':generateContent', {
+  function parseLLMJson (txt) {
+    var s = String(txt || '').replace(/```[a-z]*\s*/gi, '').replace(/```/g, '').trim();
+    var a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if (a > -1 && b > a) s = s.slice(a, b + 1);
+    return normalizeParsedReceipt(JSON.parse(s));
+  }
+
+  function runGeminiScan (opts) {
+    var backend = opts.backend;
+    var model = opts.model;
+    var thinkingLevel = opts.thinkingLevel || 'minimal';
+    var imageBase64 = opts.imageBase64;
+    var mimeType = opts.mimeType || 'image/jpeg';
+    var signal = opts.signal;
+
+    if (backend.mode === 'proxy') {
+      return fetchWithTimeout(backend.proxyUrl + '/api/scan', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          model: model,
+          imageBase64: imageBase64,
+          mimeType: mimeType,
+          thinkingLevel: thinkingLevel
+        })
+      }, SCAN_TIMEOUT_MS, signal).then(function (r) {
+        return r.text().then(function (body) {
+          var j = null;
+          try { j = JSON.parse(body); } catch (e) {}
+          if (!r.ok || !j || !j.ok) {
+            var msg = (j && j.error) ? j.error : ('Proxy error ' + r.status);
+            throw new Error(String(msg).slice(0, 180));
+          }
+          return normalizeParsedReceipt(j.data);
+        });
+      });
+    }
+
+    // Direct Gemini REST API (BYOK) — exact REST contract matching workers/split-proxy
+    return fetchWithTimeout('https://generativelanguage.googleapis.com/v1beta/models/' +
+      encodeURIComponent(model) + ':generateContent', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-goog-api-key': SHARED_GEMINI_KEY },
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': backend.apiKey },
       body: JSON.stringify({
         contents: [{ parts: [
-          { inline_data: { mime_type: m[1], data: m[2] } },
+          { inlineData: { mimeType: mimeType, data: imageBase64 } },
           { text: LLM_PROMPT }
         ] }],
-        generationConfig: { temperature: 0, responseMimeType: 'application/json' }
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseJsonSchema: RECEIPT_JSON_SCHEMA,
+          thinkingConfig: { thinkingLevel: thinkingLevel }
+        }
       })
-    }).then(function (r) {
+    }, SCAN_TIMEOUT_MS, signal).then(function (r) {
       return r.text().then(function (body) {
         if (!r.ok) {
           var detail = body;
           try { detail = JSON.parse(body).error.message; } catch (e) {}
-          throw new Error('API ' + r.status + ': ' + String(detail).slice(0, 180));
+          throw new Error('Gemini API ' + r.status + ': ' + String(detail).slice(0, 180));
         }
         var j = JSON.parse(body);
-        onStep(0.9, 'reading the lines');
         var cand = (j.candidates || [])[0];
         if (!cand) throw new Error('the model returned nothing, it may have blocked the image');
-        return ((cand.content && cand.content.parts) || [])
-          .map(function (part) { return part.text || ''; }).join('');
+        if (cand.finishReason === 'MAX_TOKENS') {
+          throw new Error('receipt was too long and the response got cut off');
+        }
+        if (cand.finishReason && cand.finishReason !== 'STOP') {
+          throw new Error('scan blocked by model (' + cand.finishReason + ')');
+        }
+        var text = ((cand.content && cand.content.parts) || [])
+          .filter(function (part) { return !part.thought && typeof part.text === 'string'; })
+          .map(function (part) { return part.text; })
+          .join('');
+        if (!text.trim()) throw new Error('the model returned an empty response');
+        return parseLLMJson(text);
       });
     });
   }
 
-  function parseLLMJson (txt) {
-    var s = String(txt).replace(/```[a-z]*\s*/gi, '').replace(/```/g, '').trim();
-    var a = s.indexOf('{'), b = s.lastIndexOf('}');
-    if (a > -1 && b > a) s = s.slice(a, b + 1);
-    var j = JSON.parse(s);
-    return {
-      place: j.place || '',
-      items: (j.items || []).filter(function (it) {
-        return it && it.name && isFinite(parseFloat(it.price));
-      }).map(function (it) {
-        return { name: pretty(String(it.name)), price: parseFloat(it.price) };
-      }),
-      tax: isFinite(parseFloat(j.tax)) ? parseFloat(j.tax) : null,
-      fees: isFinite(parseFloat(j.fees)) ? parseFloat(j.fees) : null,
-      tip: isFinite(parseFloat(j.tip)) ? parseFloat(j.tip) : null,
-      total: isFinite(parseFloat(j.total)) ? parseFloat(j.total) : null
+  /* ============================================================
+     two-stage verification & mismatch diffing
+     ============================================================ */
+  var scanning = false;
+  var scanSessionId = 0;
+  var activeScanAbort = null;
+  var verifyAbort = null;
+  var pendingVerified = null;
+  var lastScanImage = null;
+
+  function normKey (s) {
+    return String(s || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+
+  function setScanStatus (kind, text) {
+    var pill = $('#scan-status'), label = $('#scan-status-text');
+    if (!pill || !label) return;
+    if (!text) { pill.hidden = true; return; }
+    pill.hidden = false;
+    pill.className = 'engine-pill' + (kind ? ' ' + kind : '');
+    label.textContent = text;
+  }
+
+  function renderSavedScanStatus () {
+    if (verifyAbort) return;
+    if (pendingVerified) { setScanStatus('warn', 'Check differences'); return; }
+    if (state.scanEngine === 'gemini-verified') setScanStatus('ok', 'Gemini Verified ✓');
+    else if (state.scanEngine === 'gemini-fast') setScanStatus('ai', 'Gemini Fast');
+    else if (state.scanEngine === 'ocr') setScanStatus('', 'Local OCR');
+    else setScanStatus('', '');
+  }
+
+  function hideVerifyBanner () {
+    var b = $('#verify-banner');
+    if (b) { b.classList.remove('show'); b.innerHTML = ''; }
+    pendingVerified = null;
+  }
+
+  function cancelVerification () {
+    scanSessionId += 1;
+    if (verifyAbort) {
+      try { verifyAbort.abort(); } catch (e) {}
+      verifyAbort = null;
+    }
+    hideVerifyBanner();
+  }
+
+  function diffScans (p1, p2) {
+    var diffs = [];
+    var c1 = p1.items.map(function (it) { return cents(it.price); });
+    var c2 = p2.items.map(function (it) { return cents(it.price); });
+    var sum1 = c1.reduce(function (a, b) { return a + b; }, 0);
+    var sum2 = c2.reduce(function (a, b) { return a + b; }, 0);
+
+    var sorted1 = c1.slice().sort(function (a, b) { return a - b; });
+    var sorted2 = c2.slice().sort(function (a, b) { return a - b; });
+    var priceMismatch = sorted1.length !== sorted2.length || sorted1.some(function (v, idx) {
+      return Math.abs(v - sorted2[idx]) > 1;
+    });
+
+    if (p1.items.length !== p2.items.length || Math.abs(sum1 - sum2) > 1) {
+      diffs.push('Items: ' + p1.items.length + ' line' + (p1.items.length === 1 ? '' : 's') +
+        ' (' + money(sum1) + ') vs verified ' + p2.items.length + ' line' +
+        (p2.items.length === 1 ? '' : 's') + ' (' + money(sum2) + ')');
+    } else if (priceMismatch) {
+      diffs.push('Individual item prices differ between fast scan and verified scan (same total ' + money(sum2) + ')');
+    }
+
+    function cmpMoney (label, a, b, zeroAsNull) {
+      var ca = a == null ? (zeroAsNull ? 0 : null) : cents(a);
+      var cb = b == null ? (zeroAsNull ? 0 : null) : cents(b);
+      if (ca === null && cb === null) return;
+      if (ca === null || cb === null) {
+        if ((ca || 0) === 0 && (cb || 0) === 0) return;
+        diffs.push(label + ': ' + (ca == null ? 'missing' : money(ca)) +
+          ' vs verified ' + (cb == null ? 'missing' : money(cb)));
+        return;
+      }
+      if (Math.abs(ca - cb) > 1) {
+        diffs.push(label + ': ' + money(ca) + ' vs verified ' + money(cb));
+      }
+    }
+
+    cmpMoney('Subtotal', p1.subtotal, p2.subtotal, false);
+    cmpMoney('Tax', p1.tax, p2.tax, true);
+    cmpMoney('Fees', p1.fees, p2.fees, true);
+    cmpMoney('Tip', p1.tip, p2.tip, true);
+    cmpMoney('Total', p1.total, p2.total, false);
+
+    var n1 = normKey(p1.place), n2 = normKey(p2.place);
+    if (n1 && n2 && n1 !== n2 && n1.indexOf(n2) === -1 && n2.indexOf(n1) === -1) {
+      diffs.push('Merchant: "' + p1.place + '" vs verified "' + p2.place + '"');
+    }
+    return diffs;
+  }
+
+  function showVerifyBanner (diffs, verifiedData) {
+    pendingVerified = verifiedData;
+    var b = $('#verify-banner');
+    if (!b) return;
+    var listHtml = '<ul class="diff-list">' + diffs.map(function (d) {
+      return '<li>' + esc(d) + '</li>';
+    }).join('') + '</ul>';
+    b.innerHTML = '<b>Gemini 3.6 verification found differences.</b> Review before applying (your people and matching taps will be kept):' +
+      listHtml +
+      '<div class="banner-acts">' +
+      '<button class="btn sm primary" type="button" id="verify-apply">Apply verified scan</button>' +
+      '<button class="btn sm ghost" type="button" id="verify-keep">Keep current</button>' +
+      '</div>';
+    b.classList.add('show');
+    setScanStatus('warn', 'Check differences');
+
+    $('#verify-apply').onclick = function () { applyVerifiedScan(verifiedData); };
+    $('#verify-keep').onclick = function () {
+      hideVerifyBanner();
+      state.scanEngine = 'gemini-fast';
+      save();
+      setScanStatus('ai', 'Gemini Fast');
+      toast('kept current lines');
     };
+  }
+
+  function applyVerifiedScan (p2) {
+    var validIds = state.people.map(function (p) { return p.id; });
+    var pool = {};
+    state.items.forEach(function (it) {
+      var k = normKey(it.name);
+      if (!k) return;
+      if (!pool[k]) pool[k] = [];
+      pool[k].push(it.assignees.filter(function (id) { return validIds.indexOf(id) > -1; }));
+    });
+
+    state.items = (p2.items || []).map(function (it) {
+      var k = normKey(it.name);
+      var kept = (k && pool[k] && pool[k].length) ? pool[k].shift() : null;
+      return newItem(it.name, it.price, kept || validIds);
+    });
+    if (!state.items.length) state.items.push(newItem());
+
+    state.tax = (p2.tax != null && p2.tax !== 0) ? Math.abs(p2.tax).toFixed(2) : '';
+    state.fees = (p2.fees != null && p2.fees !== 0) ? Math.abs(p2.fees).toFixed(2) : '';
+    if (p2.tip != null && p2.tip !== 0) {
+      state.tip = Math.abs(p2.tip).toFixed(2);
+      state.tipMode = 'amt';
+    } else if (state.tipMode === 'amt') {
+      state.tip = '';
+      state.tipMode = 'pct';
+    }
+    state.expectedTotal = (p2.total != null && p2.total !== 0) ? p2.total : null;
+    state.expectedSubtotal = (p2.subtotal != null && p2.subtotal !== 0) ? p2.subtotal : null;
+    if (p2.place) state.place = p2.place;
+    if (p2.date) state.when = formatReceiptDate(p2.date);
+    state.scanEngine = 'gemini-verified';
+
+    hideVerifyBanner();
+    save();
+    restoreInputs();
+    renderItems();
+    renderTallies();
+    syncBar();
+    setScanStatus('ok', 'Gemini Verified ✓');
+    toast('applied verified scan');
+  }
+
+  function startVerificationPass (sessionId, backend, imageBase64, mimeType, pass1) {
+    verifyAbort = new AbortController();
+    setScanStatus('ai pulse', 'Verifying with Gemini 3.6…');
+
+    runGeminiScan({
+      backend: backend,
+      model: GEMINI_VERIFY_MODEL,
+      thinkingLevel: 'minimal',
+      imageBase64: imageBase64,
+      mimeType: mimeType,
+      signal: verifyAbort.signal
+    }).then(function (pass2) {
+      if (sessionId !== scanSessionId) return;
+      verifyAbort = null;
+      var diffs = diffScans(pass1, pass2);
+      if (!diffs.length) {
+        state.scanEngine = 'gemini-verified';
+        save();
+        setScanStatus('ok', 'Gemini Verified ✓');
+      } else {
+        showVerifyBanner(diffs, pass2);
+      }
+    }).catch(function () {
+      if (sessionId !== scanSessionId) return;
+      verifyAbort = null;
+      setScanStatus('ai', 'Gemini Fast');
+    });
   }
 
   /* ============================================================
      scan orchestration
      ============================================================ */
-  var scanning = false;
-
   function setProgress (frac, msg) {
     $('#progress').hidden = false;
     $('#progress-bar').style.width = Math.round(Math.max(0, Math.min(1, frac)) * 100) + '%';
@@ -1419,46 +1989,36 @@
   }
   function hideProgress () { $('#progress').hidden = true; $('#progress-bar').style.width = '0'; }
 
-  function showScanError (msg) {
+  function showScanError (msg, opts) {
+    opts = opts || {};
     var b = $('#scan-error');
+    var actions = '';
+    if (opts.canFallbackOcr && lastScanImage) {
+      actions = '<div class="banner-acts">' +
+        '<button class="btn sm" type="button" id="fallback-ocr-btn">Try Local OCR</button>' +
+        '</div>';
+    }
     b.innerHTML = '<b>Scan failed.</b> ' + esc(msg) +
-      '<br>Your photo is still attached, so you can press <b>Type it in</b> and read it off that.';
+      '<br>Your photo is still attached, so you can try Local OCR or press <b>Type it in</b>.' +
+      actions;
     b.classList.add('show');
+    var ocrBtn = $('#fallback-ocr-btn');
+    if (ocrBtn) {
+      ocrBtn.onclick = function () { runOcrFromImage(lastScanImage); };
+    }
   }
 
-  function handleFile (file) {
-    if (scanning) return;
-    if (!file || !/^image\//.test(file.type)) { toast('that needs to be an image'); return; }
+  function runOcrFromImage (img) {
+    if (scanning || !img) return;
+    cancelVerification();
     scanning = true;
-
-    // Gemini when it is configured and there are scans left, otherwise built-in OCR
-    var useGemini = geminiOn() && quotaLeft() > 0;
-    if (geminiOn() && !useGemini) toast('out of free scans today, using built-in OCR');
     $('#scan-error').classList.remove('show');
-    setProgress(0.05, 'opening the photo');
+    setProgress(0.08, 'preparing photo for local OCR');
 
-    readFile(file)
-      .then(loadImage)
-      .then(function (img) {
-        // a compact copy for the on-page thumbnail / lightbox
-        var view = preprocess(img, 1100);
-        state.image = view.toDataURL('image/jpeg', 0.72);
-
-        if (!useGemini) {
-          return runTesseract(preprocess(img, 1600), setProgress).then(function (text) {
-            return parseReceipt(text);
-          });
-        }
-        var send = el('canvas');
-        var s = Math.min(1, 1400 / Math.max(1, img.naturalWidth));
-        send.width = Math.round(img.naturalWidth * s);
-        send.height = Math.round(img.naturalHeight * s);
-        send.getContext('2d').drawImage(img, 0, 0, send.width, send.height);
-        return runGemini(send.toDataURL('image/jpeg', 0.85), setProgress)
-          .then(parseLLMJson);
-      })
+    runTesseract(preprocess(img, 1600), setProgress)
+      .then(function (text) { return parseReceipt(text); })
       .then(function (parsed) {
-        applyParsed(parsed);
+        applyParsed(parsed, { isNewScan: true, engine: 'ocr' });
         hideProgress();
         scanning = false;
         var n = parsed.items.length;
@@ -1469,26 +2029,118 @@
         scanning = false;
         hideProgress();
         console.error(err);
-        // stay on this screen: an API key or model error needs reading and fixing here
-        showScanError(err && err.message ? err.message : 'something went wrong, try again');
+        showScanError(err && err.message ? err.message : 'local OCR failed', { canFallbackOcr: false });
+      });
+  }
+
+  function handleFile (file) {
+    if (scanning) return;
+    if (!file || (file.type && !/^image\//.test(file.type))) { toast('that needs to be an image'); return; }
+    cancelVerification();
+    var mySession = scanSessionId;
+    scanning = true;
+
+    var backend = getScanBackend();
+    if (backend.mode === 'ocr' && backend.reason === 'quota') {
+      toast('out of shared AI scans today, using local OCR');
+    }
+    $('#scan-error').classList.remove('show');
+    setProgress(0.06, 'opening the photo');
+
+    readFile(file)
+      .then(loadImage)
+      .then(function (img) {
+        lastScanImage = img;
+        // fast full-color resize for thumbnail/lightbox AND Gemini upload
+        var colorDataUrl = resizeColor(img, 1200, 2400, 0.80);
+        saveImage(colorDataUrl);
+
+        if (backend.mode === 'ocr') {
+          return runTesseract(preprocess(img, 1600), setProgress).then(function (text) {
+            return { parsed: parseReceipt(text), engine: 'ocr' };
+          });
+        }
+
+        var m = colorDataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,([\s\S]*)$/);
+        if (!m) return Promise.reject(new Error('could not encode the image'));
+        var mimeType = m[1], imageBase64 = m[2];
+
+        setProgress(0.35, 'reading the receipt with Gemini Fast');
+        activeScanAbort = new AbortController();
+        return runGeminiScan({
+          backend: backend,
+          model: GEMINI_FAST_MODEL,
+          thinkingLevel: 'minimal',
+          imageBase64: imageBase64,
+          mimeType: mimeType,
+          signal: activeScanAbort.signal
+        }).then(function (parsed) {
+          activeScanAbort = null;
+          if (backend.mode === 'proxy') quotaSpend();
+          renderCaptureEngine();
+          setProgress(0.92, 'preparing the lines');
+          return {
+            parsed: parsed,
+            engine: 'gemini-fast',
+            verifyArgs: { sessionId: mySession, backend: backend, imageBase64: imageBase64, mimeType: mimeType }
+          };
+        });
+      })
+      .then(function (res) {
+        applyParsed(res.parsed, { isNewScan: true, engine: res.engine });
+        hideProgress();
+        scanning = false;
+        var n = res.parsed.items.length;
+        toast(n ? 'found ' + n + ' line' + (n === 1 ? '' : 's') : 'no lines found, add them by hand');
+        goTo('items');
+        if (res.verifyArgs) {
+          startVerificationPass(
+            res.verifyArgs.sessionId,
+            res.verifyArgs.backend,
+            res.verifyArgs.imageBase64,
+            res.verifyArgs.mimeType,
+            res.parsed
+          );
+        }
+      })
+      .catch(function (err) {
+        activeScanAbort = null;
+        scanning = false;
+        hideProgress();
+        console.error(err);
+        showScanError(err && err.message ? err.message : 'something went wrong, try again', {
+          canFallbackOcr: backend.mode !== 'ocr'
+        });
         save();
       });
   }
 
-  function applyParsed (p) {
+  function applyParsed (p, opts) {
+    opts = opts || {};
     state.items = (p.items || []).map(function (it) { return newItem(it.name, it.price); });
     if (!state.items.length) state.items.push(newItem());
-    if (p.tax != null && p.tax !== 0) state.tax = Math.abs(p.tax).toFixed(2);
-    if (p.fees != null && p.fees !== 0) state.fees = Math.abs(p.fees).toFixed(2);
-    if (p.tip != null && p.tip !== 0) { state.tip = Math.abs(p.tip).toFixed(2); state.tipMode = 'amt'; }
+
+    // reset all receipt-level fields on a new scan so stale values never bleed over
+    state.tax = (p.tax != null && p.tax !== 0) ? Math.abs(p.tax).toFixed(2) : '';
+    state.fees = (p.fees != null && p.fees !== 0) ? Math.abs(p.fees).toFixed(2) : '';
+    if (p.tip != null && p.tip !== 0) {
+      state.tip = Math.abs(p.tip).toFixed(2);
+      state.tipMode = 'amt';
+    } else {
+      state.tip = '';
+      state.tipMode = 'pct';
+    }
     state.expectedTotal = (p.total != null && p.total !== 0) ? p.total : null;
     state.expectedSubtotal = (p.subtotal != null && p.subtotal !== 0) ? p.subtotal : null;
-    if (p.place && !state.place) state.place = p.place;
-    if (!state.when) state.when = todayLabel();
+    state.place = p.place ? String(p.place).trim() : '';
+    state.when = (p.date && String(p.date).trim()) ? formatReceiptDate(p.date) : todayLabel();
+    if (opts.engine !== undefined) state.scanEngine = opts.engine;
+
     save();
     restoreInputs();
     renderItems();
     renderTallies();
+    renderSavedScanStatus();
   }
 
   /* ============================================================
@@ -1508,7 +2160,8 @@
     });
 
     document.body.classList.toggle('compact', step !== 'people');
-    if (step === 'items') { restoreInputs(); renderItems(); renderTallies(); showThumb(); }
+    if (step === 'people') renderCaptureEngine();
+    if (step === 'items') { restoreInputs(); renderItems(); renderTallies(); showThumb(); renderSavedScanStatus(); }
     if (step === 'results') renderResults();
     syncBar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1552,6 +2205,8 @@
     $$('#tip-mode button').forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.mode === state.tipMode ? 'true' : 'false');
     });
+    if ($('#cfg-apikey')) $('#cfg-apikey').value = getApiKey();
+    if ($('#cfg-proxy')) $('#cfg-proxy').value = getSavedProxy();
   }
 
   function bindNum (id, key) {
@@ -1597,6 +2252,7 @@
       });
     });
     $('#drop-upload').addEventListener('drop', function (e) {
+      e.stopPropagation();
       if (e.dataTransfer && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
     document.addEventListener('dragover', function (e) { e.preventDefault(); });
@@ -1613,6 +2269,26 @@
         if (/^image\//.test(items[i].type)) { handleFile(items[i].getAsFile()); return; }
       }
     });
+
+    // scan settings inputs
+    $('#cfg-apikey').addEventListener('input', function () {
+      setApiKey(this.value);
+      renderCaptureEngine();
+    });
+    $('#cfg-proxy').addEventListener('change', function () {
+      var clean = setSavedProxy(this.value);
+      if (this.value.trim() && !clean) toast('proxy URL must start with https:// (or localhost)');
+      this.value = clean;
+      renderCaptureEngine();
+    });
+    $('#cfg-clear').onclick = function () {
+      setApiKey('');
+      setSavedProxy('');
+      $('#cfg-apikey').value = '';
+      $('#cfg-proxy').value = '';
+      renderCaptureEngine();
+      toast('cleared custom scan settings');
+    };
 
     $('#add-item').onclick = addItemAndFocus;
     $('#add-item-2').onclick = addItemAndFocus;
@@ -1677,7 +2353,12 @@
     $('#reset-all').onclick = function (e) {
       e.preventDefault();
       if (!confirm('Clear this receipt and start over? Saved names are kept.')) return;
-      try { localStorage.removeItem(LS.state); } catch (err) {}
+      cancelVerification();
+      if (activeScanAbort) { try { activeScanAbort.abort(); } catch (err) {} }
+      try {
+        localStorage.removeItem(LS.state);
+        localStorage.removeItem(LS.image);
+      } catch (err) {}
       location.reload();
     };
 
@@ -1700,11 +2381,13 @@
      boot
      ============================================================ */
   function init () {
+    importHashConfig();
     var restored = load();
     if (!state.people.length) { state.people.push(newPerson('Me')); state.people.push(newPerson('')); }
     state.people.forEach(function (p, i) { if (!p.color) p.color = PALETTE[i % PALETTE.length]; });
 
     wire();
+    renderCaptureEngine();
     renderPeople();
     renderItems();
     renderTallies();
