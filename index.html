@@ -400,19 +400,10 @@
   .role-chain{
     position:relative;
     margin-top:8px;
-    padding-left:16px;
+    padding-left:18px;
     display:flex;
     flex-direction:column;
-    gap:10px;
-  }
-  .role-chain::before{
-    content:"";
-    position:absolute;
-    left:4px;
-    top:6px;
-    bottom:6px;
-    width:1px;
-    background:var(--rule);
+    gap:12px;
   }
   .role-step{
     position:relative;
@@ -422,13 +413,24 @@
   .role-step::before{
     content:"";
     position:absolute;
-    left:-15px;
-    top:6px;
-    width:7px;
-    height:7px;
+    left:-18px;
+    top:5px;
+    width:9px;
+    height:9px;
+    box-sizing:border-box;
     border-radius:50%;
     background:var(--bg);
-    border:1.5px solid var(--muted);
+    border:2px solid var(--muted);
+    z-index:1;
+  }
+  .role-step:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    left:-14.5px;
+    top:14px;
+    bottom:-17px;
+    width:2px;
+    background:var(--rule);
   }
   .role-step:first-child::before{
     background:var(--co-nvidia);
