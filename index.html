@@ -379,63 +379,42 @@
   /* experience */
   .xp{
     display:flex;flex-direction:column;gap:0;
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
   }
   .row{
     display:grid;grid-template-columns:20% minmax(0, 1fr) 15%;gap:16px;
-    padding:22px 14px;
-    border-top:1px solid color-mix(in srgb, var(--hair) 65%, transparent);
+    padding:18px 14px;
+    border-top:1px solid var(--hair);
     border-left:2px solid transparent;
     align-items:baseline;
     transition:background .15s ease, border-left-color .15s ease;
   }
   .row:first-child{border-top:none}
   .row:hover{background:var(--bg-2);border-left-color:var(--row-accent, var(--accent))}
-  .row .when{
-    font-size:13px;color:var(--muted);white-space:nowrap;
-    font-variant-numeric:tabular-nums;letter-spacing:0.01em;
-    transition:color .15s ease;
-  }
+  .row .when{font-size:12px;color:var(--muted);white-space:nowrap;letter-spacing:0.01em;font-variant-numeric:tabular-nums}
   .row .what{font-size:14px;min-width:0}
-  .row .what .co{
-    display:inline-flex;align-items:baseline;gap:4px;
-    font-size:20px;font-weight:600;line-height:1.25;
-    transition:color .15s ease, opacity .15s ease;
-  }
-  .row .what .co::after,
-  .edu-co::after{
-    content:"↗";
-    font-size:13px;
-    opacity:0;
-    transform:translate(-2px, 1px);
-    transition:opacity .15s ease, transform .15s ease;
-  }
-  .row .what .co:hover::after,
-  .edu-co:hover::after{
-    opacity:0.75;
-    transform:translate(0, 0);
-  }
-  .row .what .title{color:var(--ink-2);display:block;margin-top:5px;font-size:14px;font-weight:400;line-height:1.45}
-  .row .what .title .job-title{display:block;font-size:16px;font-weight:500;color:var(--ink)}
+  .row .what .co{font-weight:700}
+  .row .what .title{color:var(--ink-2);display:block;margin-top:3px;font-size:13px}
+  .row .what .title .job-title{font-weight:700;color:var(--ink)}
   .role-chain{
     position:relative;
-    margin-top:12px;
-    padding-left:20px;
+    margin-top:8px;
+    padding-left:18px;
     display:flex;
     flex-direction:column;
-    gap:14px;
+    gap:12px;
   }
   .role-step{
     position:relative;
-    font-size:14px;
-    font-weight:400;
+    font-size:13px;
     color:var(--ink-2);
-    line-height:1.45;
   }
   .role-step::before{
     content:"";
     position:absolute;
-    left:-20px;
-    top:6px;
+    left:-18px;
+    top:5px;
     width:9px;
     height:9px;
     box-sizing:border-box;
@@ -447,92 +426,41 @@
   .role-step:not(:last-child)::after{
     content:"";
     position:absolute;
-    left:-16.5px;
-    top:15px;
-    bottom:-20px;
+    left:-14.5px;
+    top:14px;
+    bottom:-17px;
     width:2px;
     background:var(--rule);
   }
-  /* Hollow green dot indicates an incoming / future role */
   .role-step.is-incoming::before{
     background:var(--bg);
     border-color:var(--co-nvidia);
   }
-  .role-step .job-title{
-    display:block;
-    font-size:16px;
-    font-weight:500;
-    color:var(--ink);
-  }
-  .role-step .step-meta{
-    display:flex;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-top:2px;
-  }
-  .incoming-tag{
-    font-size:11px;
-    font-weight:500;
-    letter-spacing:0.06em;
-    text-transform:uppercase;
-    color:var(--co-nvidia);
-  }
+  .role-step .job-title{font-weight:700;color:var(--ink)}
   .role-step .step-when{
-    font-size:13px;
+    display:block;
+    font-size:11.5px;
     color:var(--muted);
+    margin-top:1px;
     font-variant-numeric:tabular-nums;
   }
-  .row .where{
-    font-size:13px;color:var(--muted);text-align:right;white-space:nowrap;
-    transition:color .15s ease;
-  }
+  .row .where{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
 
-  .edu-block{
-    margin-top:28px;
-    padding:20px 14px 4px;
-    border-top:1px solid color-mix(in srgb, var(--hair) 65%, transparent);
+  .edu-bar{
+    margin-top:18px;padding:12px 14px;
+    border:1px solid var(--hair);border-radius:6px;background:var(--bg-2);
+    font-size:12.5px;color:var(--ink-2);
+    display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;
   }
-  .edu-label{
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin-bottom:8px;
-  }
-  .edu-co{
-    display:inline-flex;align-items:baseline;gap:4px;
-    font-size:18px;font-weight:600;line-height:1.3;
-    transition:color .15s ease;
-  }
-  .edu-degree{
-    margin-top:4px;
-    font-size:15px;
-    font-weight:500;
-    color:var(--ink);
-  }
-  .edu-conc{
-    margin-top:2px;
-    font-size:14px;
-    color:var(--ink-2);
-  }
-  .edu-grad{
-    margin-top:4px;
-    font-size:13px;
-    color:var(--muted);
-    font-variant-numeric:tabular-nums;
-  }
+  .edu-bar strong{color:var(--ink)}
+  .edu-bar .edu-grad{color:var(--muted);font-size:12px}
 
   @media (max-width:640px){
     .row{
-      grid-template-columns:1fr;gap:6px;
-      padding:18px 10px;
+      grid-template-columns:1fr;gap:4px;
+      padding:14px 10px;
     }
-    .row .what{order:1}
-    .row .when{order:2;margin-top:4px}
-    .row .where{order:3;text-align:left}
-    .edu-block{padding:18px 10px 4px}
+    .row .where{text-align:left}
   }
 
   /* projects */
@@ -822,14 +750,11 @@
               <div class="role-chain">
                 <div class="role-step is-incoming">
                   <span class="job-title">Applied Researcher</span>
-                  <div class="step-meta">
-                    <span class="incoming-tag">Incoming</span>
-                    <span class="step-when">· February 2027</span>
-                  </div>
+                  <span class="step-when">Incoming · Feb 2027</span>
                 </div>
                 <div class="role-step">
-                  <span class="job-title">Software Engineer Intern</span>
-                  Applied Research · <span class="step-when">May to Dec 2026</span>
+                  <span class="job-title">Software Engineer Intern</span> · Applied Research
+                  <span class="step-when">May 2026 — Dec 2026</span>
                 </div>
               </div>
             </div>
@@ -840,7 +765,7 @@
             <div class="when">May 2025 — May 2026</div>
             <div class="what">
               <a href="https://www.coinbase.com" target="_blank" rel="noopener" class="co co-coinbase">Coinbase</a>
-              <span class="title"><span class="job-title">Software Engineer Intern</span>Infra / IAM</span>
+              <span class="title"><span class="job-title">Software Engineer Intern</span> · Infra / IAM</span>
             </div>
             <div class="where">New York, NY</div>
           </div>
@@ -849,7 +774,7 @@
             <div class="when">Nov 2024 — Jan 2025</div>
             <div class="what">
               <a href="https://www.palantir.com" target="_blank" rel="noopener" class="co co-palantir">Palantir</a>
-              <span class="title"><span class="job-title">Fellowship</span>AI Platform (AIP)</span>
+              <span class="title"><span class="job-title">Fellowship</span> · AI Platform (AIP)</span>
             </div>
             <div class="where">Remote</div>
           </div>
@@ -858,7 +783,7 @@
             <div class="when">May 2024 — Aug 2024</div>
             <div class="what">
               <a href="https://www.vanguard.com" target="_blank" rel="noopener" class="co co-vanguard">Vanguard</a>
-              <span class="title"><span class="job-title">Software Engineer Intern</span>Fraud Engineering</span>
+              <span class="title"><span class="job-title">Software Engineer Intern</span> · Fraud Engineering</span>
             </div>
             <div class="where">Malvern, PA</div>
           </div>
@@ -867,18 +792,18 @@
             <div class="when">Jun 2021 — Aug 2023</div>
             <div class="what">
               <a href="https://www.lockheedmartin.com" target="_blank" rel="noopener" class="co co-lockheed">Lockheed Martin</a>
-              <span class="title"><span class="job-title">Software Engineer Intern</span>Cyber / Cloud</span>
+              <span class="title"><span class="job-title">Software Engineer Intern</span> · Cyber / Cloud</span>
             </div>
             <div class="where">King of Prussia, PA</div>
           </div>
         </div>
 
-        <div class="edu-block">
-          <div class="edu-label"><span aria-hidden="true">↳ </span>Education</div>
-          <a href="https://www.pitt.edu" target="_blank" rel="noopener" class="co-pitt edu-co">University of Pittsburgh</a>
-          <div class="edu-degree">BS, Computer Science</div>
-          <div class="edu-conc">Concentration in Mathematics</div>
-          <div class="edu-grad">Dec 2026 (expected)</div>
+        <div class="edu-bar">
+          <div>
+            <span aria-hidden="true">↳ </span>
+            <a href="https://www.pitt.edu" target="_blank" rel="noopener" class="co-pitt">University of Pittsburgh</a> · <strong>BS: Computer Science</strong> · Concentration in Mathematics
+          </div>
+          <div class="edu-grad">Expected December 2026</div>
         </div>
       </section>
 
