@@ -1,0 +1,36 @@
+# Shreyash Ranjan
+
+> Applied Researcher at NVIDIA (starting Feb 2027; Software Engineer Intern in Applied Research May–Dec 2026) and Computer Science student at the University of Pittsburgh (BS in Computer Science, Concentration in Mathematics).
+
+## About
+
+- Started writing software professionally at age 16 at Lockheed Martin.
+- Worked across security, fraud, IAM, and AI infrastructure at Vanguard, Palantir, Coinbase, and NVIDIA.
+- Research and engineering interests: mechanistic interpretability, audio-language models, LLM sycophancy & robustness, AI security, and autonomous research agents.
+
+## Experience
+
+- **NVIDIA** — Applied Researcher (Incoming, Feb 2027); Software Engineer Intern, Applied Research (May 2026 – Dec 2026), Santa Clara, CA
+- **Coinbase** — Software Engineer Intern, Infra / IAM (May 2025 – May 2026), New York, NY
+- **Palantir** — Fellowship, AI Platform (AIP) (Nov 2024 – Jan 2025), Remote
+- **Vanguard** — Software Engineer Intern, Fraud Engineering (May 2024 – Aug 2024), Malvern, PA
+- **Lockheed Martin** — Software Engineer Intern, Cyber / Cloud (Jun 2021 – Aug 2023), King of Prussia, PA
+
+## Education
+
+- **University of Pittsburgh** — BS: Computer Science, Concentration in Mathematics
+
+## Projects
+
+- [/split — AI Receipt Splitter](https://shreyashranjan.com/split/): Receipt scanning and bill-splitting web app with tax, fees, and tip distribution.
+- [Are You Sure About That?](https://github.com/codingshreyash/are-you-sure-about-that): Benchmarking when LLMs flip answers under user pressure, sycophancy prompts, new evidence, and "are you sure?" follow-ups.
+- [Audio MechInterp](https://github.com/codingshreyash/audio-mechinterp): Mechanistic interpretability and causal Jacobian-lens interventions tracing information flow in open audio-language models.
+- [Bastion](https://github.com/codingshreyash/bastion): Portfolio intelligence system with lot-level tracking, volatility-adjusted stops, and automated ETF overlap and fee-drag analysis.
+- [Classhi](https://github.com/codingshreyash/Classhi): Kalshi-style prediction markets for university computer science lectures.
+
+## Links
+
+- Website: https://shreyashranjan.com/
+- GitHub: https://github.com/codingshreyash
+- LinkedIn: https://www.linkedin.com/in/shreyash-ranjan/
+- Email: shreyashran@gmail.com
