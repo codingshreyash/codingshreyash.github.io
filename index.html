@@ -375,6 +375,32 @@
     transition:background .15s ease, color .15s ease, border-color .15s ease;
   }
   .about .link:hover{background:var(--ink);color:var(--bg);border-bottom-color:var(--ink)}
+  .interests{
+    margin-top:26px;
+    padding-top:20px;
+    border-top:1px dashed var(--hair);
+    max-width:64ch;
+  }
+  .interests-label{
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .interest-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .interest-item{
+    font-size:12px;
+    color:var(--ink-2);
+    background:var(--bg-2);
+    border:1px solid var(--hair);
+    padding:4px 10px;
+    border-radius:4px;
+  }
 
   /* experience */
   .xp{
@@ -737,6 +763,16 @@
           as an <span class="accent nowrap">Applied Researcher</span> in <span class="accent nowrap">Feb 2027</span>.
           Outside of work I play pickleball, go for hikes, love trying new coffee, and build cool projects.
         </p>
+        <div class="interests">
+          <div class="interests-label">currently interested in</div>
+          <div class="interest-list">
+            <span class="interest-item">Mechanistic interpretability</span>
+            <span class="interest-item">Audio-language models</span>
+            <span class="interest-item">LLM sycophancy &amp; robustness</span>
+            <span class="interest-item">AI security &amp; red-teaming</span>
+            <span class="interest-item">Autonomous research agents</span>
+          </div>
+        </div>
       </section>
 
       <!-- EXPERIENCE -->
@@ -853,27 +889,27 @@
             </div>
           </a>
 
-          <a class="proj" href="https://github.com/braynguyen/The-Social-Space" target="_blank" rel="noopener">
+          <a class="proj" href="https://github.com/codingshreyash/are-you-sure-about-that" target="_blank" rel="noopener">
             <div class="proj-head">
-              <div class="pname">The Social Space</div>
+              <div class="pname">Are You Sure About That?</div>
               <span class="parrow" aria-hidden="true">↗</span>
             </div>
-            <p class="pdesc">Interactive 3D web visualization exploring how the TikTok recommendation algorithm clusters content and audiences.</p>
+            <p class="pdesc">Benchmarking when LLMs flip answers under user pressure, sycophancy prompts, new evidence, and "are you sure?" follow-ups.</p>
             <div class="tags">
-              <span class="tag">3D Web</span>
-              <span class="tag">Visualization</span>
+              <span class="tag">LLM Eval</span>
+              <span class="tag">Sycophancy</span>
             </div>
           </a>
 
-          <a class="proj" href="https://github.com/krishnakatakota/VR-Hab" target="_blank" rel="noopener">
+          <a class="proj" href="https://github.com/codingshreyash/audio-mechinterp" target="_blank" rel="noopener">
             <div class="proj-head">
-              <div class="pname">VR-Hab</div>
+              <div class="pname">Audio MechInterp</div>
               <span class="parrow" aria-hidden="true">↗</span>
             </div>
-            <p class="pdesc">Virtual reality rehabilitation platform designed to guide motor exercises and track progress during neurological recovery.</p>
+            <p class="pdesc">Mechanistic interpretability and causal Jacobian-lens interventions tracing information flow in open audio-language models.</p>
             <div class="tags">
-              <span class="tag">VR</span>
-              <span class="tag">Healthcare</span>
+              <span class="tag">Mech Interp</span>
+              <span class="tag">Audio LLMs</span>
             </div>
           </a>
         </div>
