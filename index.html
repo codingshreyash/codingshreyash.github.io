@@ -13,7 +13,7 @@
     }
   })();
 </script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://github-contributions-api.jogruber.de;" />
 <title>Shreyash Ranjan - Applied Researcher | Portfolio &amp; Resume</title>
 <meta name="description" content="Shreyash Ranjan - Incoming Applied Researcher at NVIDIA and CS student at University of Pittsburgh. Previously at Coinbase, Palantir, Vanguard, and Lockheed Martin." />
 <meta name="robots" content="index, follow" />
@@ -67,6 +67,11 @@
     --co-vanguard:#96151d;
     --co-lockheed:#002f6c;
     --co-pitt:#003594;
+    --gh-0:#e4dfd3;
+    --gh-1:#9be9a8;
+    --gh-2:#40c463;
+    --gh-3:#30a14e;
+    --gh-4:#216e39;
   }
 
   /* dark mode / cool charcoal technical theme */
@@ -93,6 +98,11 @@
     --co-vanguard:#ec7085;
     --co-lockheed:#56a8eb;
     --co-pitt:#ffb81c;
+    --gh-0:#2d2d34;
+    --gh-1:#0e4429;
+    --gh-2:#006d32;
+    --gh-3:#26a641;
+    --gh-4:#39d353;
   }
 
   *{box-sizing:border-box}
@@ -571,6 +581,60 @@
   .gh-card:hover .gh-sub{color:var(--bg-2)}
   .gh-arrow{font-size:18px;color:var(--accent);transition:transform .15s ease, color .15s ease}
 
+  .gh-contrib{
+    margin-top:12px;
+    border:1px solid var(--hair);
+    border-radius:6px;
+    background:var(--bg-2);
+    padding:14px 16px;
+  }
+  .gh-contrib-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .gh-contrib-total{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+  .gh-legend{display:inline-flex;align-items:center;gap:4px;font-size:10.5px}
+  .gh-legend-sq{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .gh-graph-scroll{overflow-x:auto;padding-bottom:2px}
+  .gh-months{
+    display:grid;
+    grid-auto-flow:column;
+    grid-auto-columns:11px;
+    gap:3px;
+    font-size:10px;
+    color:var(--muted);
+    margin-bottom:4px;
+    height:13px;
+    line-height:13px;
+  }
+  .gh-months span{white-space:nowrap}
+  .gh-grid{
+    display:grid;
+    grid-auto-flow:column;
+    grid-template-rows:repeat(7, 11px);
+    grid-auto-columns:11px;
+    gap:3px;
+    width:max-content;
+  }
+  .gh-cell{
+    width:11px;
+    height:11px;
+    border-radius:2px;
+    background:var(--gh-0);
+  }
+  .gh-cell[data-level="1"],.gh-legend-sq[data-level="1"]{background:var(--gh-1)}
+  .gh-cell[data-level="2"],.gh-legend-sq[data-level="2"]{background:var(--gh-2)}
+  .gh-cell[data-level="3"],.gh-legend-sq[data-level="3"]{background:var(--gh-3)}
+  .gh-cell[data-level="4"],.gh-legend-sq[data-level="4"]{background:var(--gh-4)}
+  .gh-legend-sq[data-level="0"]{background:var(--gh-0)}
+  .gh-status{font-size:12px;color:var(--muted)}
+
   /* contact */
   .contact-grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
@@ -921,6 +985,25 @@
           </div>
           <div class="gh-arrow" aria-hidden="true">→</div>
         </a>
+
+        <div class="gh-contrib" id="gh-contrib" aria-label="GitHub contribution activity">
+          <div class="gh-contrib-head">
+            <span class="gh-contrib-total" id="gh-total">Loading live contributions…</span>
+            <span class="gh-legend" aria-hidden="true">
+              Less
+              <span class="gh-legend-sq" data-level="0"></span>
+              <span class="gh-legend-sq" data-level="1"></span>
+              <span class="gh-legend-sq" data-level="2"></span>
+              <span class="gh-legend-sq" data-level="3"></span>
+              <span class="gh-legend-sq" data-level="4"></span>
+              More
+            </span>
+          </div>
+          <div class="gh-graph-scroll" id="gh-scroll">
+            <div class="gh-months" id="gh-months" aria-hidden="true"></div>
+            <div class="gh-grid" id="gh-grid" role="img" aria-label="GitHub contribution calendar"></div>
+          </div>
+        </div>
       </section>
 
       <!-- CONTACT -->
@@ -1073,10 +1156,110 @@
     document.body.removeChild(ta);
   }
 
+  function initGithubContrib() {
+    var totalEl = document.getElementById('gh-total');
+    var gridEl = document.getElementById('gh-grid');
+    var monthsEl = document.getElementById('gh-months');
+    var scrollEl = document.getElementById('gh-scroll');
+    if (!totalEl || !gridEl || !monthsEl) return;
+
+    var CACHE_KEY = 'gh.contrib.codingshreyash.v1';
+    var CACHE_TTL_MS = 15 * 60 * 1000;
+
+    function render(data) {
+      var list = Array.isArray(data && data.contributions) ? data.contributions : [];
+      if (!list.length) {
+        totalEl.textContent = 'Contributions available on GitHub';
+        return;
+      }
+
+      var total = data.total && typeof data.total.lastYear === 'number'
+        ? data.total.lastYear
+        : list.reduce(function(sum, d) { return sum + (d.count || 0); }, 0);
+      totalEl.textContent = total.toLocaleString() + ' contributions in the last year';
+
+      // Pad leading days so column 0 starts on Sunday
+      var firstParts = list[0].date.split('-');
+      var firstDay = new Date(Number(firstParts[0]), Number(firstParts[1]) - 1, Number(firstParts[2])).getDay();
+
+      var gridFrag = document.createDocumentFragment();
+      for (var p = 0; p < firstDay; p++) {
+        var pad = document.createElement('span');
+        pad.className = 'gh-cell';
+        pad.style.visibility = 'hidden';
+        gridFrag.appendChild(pad);
+      }
+
+      var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var monthLabels = {};
+      for (var i = 0; i < list.length; i++) {
+        var d = list[i];
+        var cell = document.createElement('span');
+        cell.className = 'gh-cell';
+        cell.setAttribute('data-level', String(d.level || 0));
+        var cnt = d.count || 0;
+        cell.title = cnt + (cnt === 1 ? ' contribution' : ' contributions') + ' on ' + d.date;
+        gridFrag.appendChild(cell);
+
+        var col = Math.floor((firstDay + i) / 7);
+        var parts = d.date.split('-');
+        if (Number(parts[2]) <= 7 && !monthLabels[col]) {
+          monthLabels[col] = MONTHS[Number(parts[1]) - 1];
+        }
+      }
+
+      gridEl.innerHTML = '';
+      gridEl.appendChild(gridFrag);
+
+      var totalCols = Math.ceil((firstDay + list.length) / 7);
+      var mFrag = document.createDocumentFragment();
+      var lastMonth = '';
+      for (var c = 0; c < totalCols; c++) {
+        var mSpan = document.createElement('span');
+        var lbl = monthLabels[c] || '';
+        if (lbl && lbl !== lastMonth) {
+          mSpan.textContent = lbl;
+          lastMonth = lbl;
+        }
+        mFrag.appendChild(mSpan);
+      }
+      monthsEl.innerHTML = '';
+      monthsEl.appendChild(mFrag);
+
+      if (scrollEl) {
+        scrollEl.scrollLeft = scrollEl.scrollWidth;
+      }
+    }
+
+    try {
+      var cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+      if (cached && (Date.now() - cached.ts) < CACHE_TTL_MS && cached.data) {
+        render(cached.data);
+        return;
+      }
+    } catch (e) {}
+
+    fetch('https://github-contributions-api.jogruber.de/v4/codingshreyash?y=last')
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        try {
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: data }));
+        } catch (e) {}
+        render(data);
+      })
+      .catch(function() {
+        totalEl.textContent = 'View live contributions on github.com/codingshreyash';
+      });
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     initTheme();
     initTypeWriter();
     initCopyEmail();
+    initGithubContrib();
   });
 </script>
 </body>
